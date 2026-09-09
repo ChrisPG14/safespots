@@ -1,0 +1,475 @@
+{
+  "generado_en": "2026-09-09T07:03:49+00:00",
+  "metodo_version": "0.1.0",
+  "periodo": {
+    "inicio": "2016-01-01",
+    "fin": "2021-02-28",
+    "meses": 62,
+    "etiqueta": "2016-01 a 2021-02 (62 meses)"
+  },
+  "advertencia_principal": "Los datos de incidencia delictiva por colonia terminan en febrero de 2021, porque el IIEG descontinuó esa publicación. El mapa describe un patrón histórico, no la situación actual.",
+  "municipios": [
+    {
+      "clave": "14039",
+      "nombre": "Guadalajara"
+    },
+    {
+      "clave": "14070",
+      "nombre": "El Salto"
+    },
+    {
+      "clave": "14097",
+      "nombre": "Tlajomulco de Zúñiga"
+    },
+    {
+      "clave": "14098",
+      "nombre": "San Pedro Tlaquepaque"
+    },
+    {
+      "clave": "14101",
+      "nombre": "Tonalá"
+    },
+    {
+      "clave": "14120",
+      "nombre": "Zapopan"
+    }
+  ],
+  "unidad_analisis": {
+    "tipo": "colonia",
+    "total": 2068,
+    "fuente_poligonos": "Colonias de Jalisco con información sociodemográfica"
+  },
+  "perfiles": [
+    {
+      "clave": "general",
+      "nombre": "Riesgo general",
+      "descripcion": "Todos los delitos registrados, ponderados por severidad y normalizados por población residente.",
+      "advertencia": "",
+      "orden": 1,
+      "normalizacion": "poblacion",
+      "unidad_tasa": "por 100 mil hab.",
+      "campo_indice": "idx_general",
+      "campo_estrato": "est_general",
+      "campo_incidentes": "inc_general",
+      "campo_tasa": "tasa_general",
+      "campo_muestra_baja": "baja_general",
+      "campo_percentil": "pct_general",
+      "delitos": [
+        "abuso_sexual",
+        "danio_propiedad",
+        "extorsion",
+        "feminicidio",
+        "homicidio_culposo",
+        "homicidio_doloso",
+        "lesiones_dolosas",
+        "narcomenudeo",
+        "otro",
+        "parricidio",
+        "robo_autopartes",
+        "robo_banco",
+        "robo_carga_pesada",
+        "robo_casa_habitacion",
+        "robo_cuentahabientes",
+        "robo_interior_vehiculo",
+        "robo_motocicleta",
+        "robo_negocio",
+        "robo_persona",
+        "robo_vehiculo",
+        "secuestro",
+        "violacion",
+        "violencia_familiar"
+      ],
+      "resumen_estratos": {
+        "bajo": 1034,
+        "moderado": 517,
+        "alto": 310,
+        "critico": 207
+      }
+    },
+    {
+      "clave": "peaton",
+      "nombre": "Riesgo peatonal",
+      "descripcion": "Delitos contra quien camina en vía pública: robo a persona, lesiones, homicidio. Medido por concentración territorial, porque lo que importa a quien transita es cuántos hechos ocurren en la zona, no la proporción respecto a sus vecinos.",
+      "advertencia": "La fuente no registra la hora del hecho, así que este perfil NO puede distinguir riesgo diurno de nocturno.",
+      "orden": 2,
+      "normalizacion": "area",
+      "unidad_tasa": "por km²",
+      "campo_indice": "idx_peaton",
+      "campo_estrato": "est_peaton",
+      "campo_incidentes": "inc_peaton",
+      "campo_tasa": "dens_peaton",
+      "campo_muestra_baja": "baja_peaton",
+      "campo_percentil": "pct_peaton",
+      "delitos": [
+        "abuso_sexual",
+        "feminicidio",
+        "homicidio_culposo",
+        "homicidio_doloso",
+        "lesiones_dolosas",
+        "robo_cuentahabientes",
+        "robo_persona",
+        "secuestro",
+        "violacion"
+      ],
+      "resumen_estratos": {
+        "bajo": 1034,
+        "moderado": 517,
+        "alto": 310,
+        "critico": 207
+      }
+    },
+    {
+      "clave": "vehicular",
+      "nombre": "Riesgo vehicular",
+      "descripcion": "Robo de vehículo, de motocicleta, al interior del vehículo y de autopartes. Responde si conviene dejar el auto en la calle.",
+      "advertencia": "",
+      "orden": 3,
+      "normalizacion": "area",
+      "unidad_tasa": "por km²",
+      "campo_indice": "idx_vehicular",
+      "campo_estrato": "est_vehicular",
+      "campo_incidentes": "inc_vehicular",
+      "campo_tasa": "dens_vehicular",
+      "campo_muestra_baja": "baja_vehicular",
+      "campo_percentil": "pct_vehicular",
+      "delitos": [
+        "homicidio_culposo",
+        "robo_autopartes",
+        "robo_interior_vehiculo",
+        "robo_motocicleta",
+        "robo_vehiculo"
+      ],
+      "resumen_estratos": {
+        "bajo": 1034,
+        "moderado": 517,
+        "alto": 310,
+        "critico": 207
+      }
+    },
+    {
+      "clave": "residencial",
+      "nombre": "Riesgo residencial",
+      "descripcion": "Robo a casa habitación y delitos violentos, por 100 mil habitantes. Insumo del módulo de valuación inmobiliaria: aquí sí la víctima potencial es quien vive en la colonia.",
+      "advertencia": "",
+      "orden": 4,
+      "normalizacion": "poblacion",
+      "unidad_tasa": "por 100 mil hab.",
+      "campo_indice": "idx_residencial",
+      "campo_estrato": "est_residencial",
+      "campo_incidentes": "inc_residencial",
+      "campo_tasa": "tasa_residencial",
+      "campo_muestra_baja": "baja_residencial",
+      "campo_percentil": "pct_residencial",
+      "delitos": [
+        "abuso_sexual",
+        "danio_propiedad",
+        "feminicidio",
+        "homicidio_doloso",
+        "lesiones_dolosas",
+        "parricidio",
+        "robo_banco",
+        "robo_casa_habitacion",
+        "robo_cuentahabientes",
+        "robo_persona",
+        "secuestro",
+        "violacion",
+        "violencia_familiar"
+      ],
+      "resumen_estratos": {
+        "bajo": 1034,
+        "moderado": 517,
+        "alto": 310,
+        "critico": 207
+      }
+    },
+    {
+      "clave": "negocio",
+      "nombre": "Riesgo comercial",
+      "descripcion": "Robo a negocio, a banco y a carga pesada, por kilómetro cuadrado. Para evaluar la ubicación de un local.",
+      "advertencia": "",
+      "orden": 5,
+      "normalizacion": "area",
+      "unidad_tasa": "por km²",
+      "campo_indice": "idx_negocio",
+      "campo_estrato": "est_negocio",
+      "campo_incidentes": "inc_negocio",
+      "campo_tasa": "dens_negocio",
+      "campo_muestra_baja": "baja_negocio",
+      "campo_percentil": "pct_negocio",
+      "delitos": [
+        "danio_propiedad",
+        "extorsion",
+        "robo_banco",
+        "robo_carga_pesada",
+        "robo_negocio"
+      ],
+      "resumen_estratos": {
+        "bajo": 1034,
+        "moderado": 517,
+        "alto": 310,
+        "critico": 207
+      }
+    }
+  ],
+  "estratos": [
+    {
+      "clave": "bajo",
+      "percentil_hasta": 50.0
+    },
+    {
+      "clave": "moderado",
+      "percentil_hasta": 75.0
+    },
+    {
+      "clave": "alto",
+      "percentil_hasta": 90.0
+    },
+    {
+      "clave": "critico",
+      "percentil_hasta": 100.0
+    }
+  ],
+  "metodologia": {
+    "descripcion": "Conteos por colonia ponderados por severidad del delito, convertidos a tasa anual por 100 mil habitantes, suavizados con contracción bayesiana hacia la media metropolitana, comprimidos logarítmicamente y escalados a 0-100.",
+    "umbral_muestra_baja": {
+      "poblacion_minima": 300,
+      "incidentes_minimos": 20,
+      "nota": "Las colonias por debajo de estos umbrales se marcan porque su tasa no es interpretable individualmente."
+    },
+    "pesos_severidad": {
+      "abuso_sexual": 7.5,
+      "danio_propiedad": 2.5,
+      "extorsion": 6.0,
+      "feminicidio": 10.0,
+      "homicidio_culposo": 6.0,
+      "homicidio_doloso": 10.0,
+      "lesiones_dolosas": 6.5,
+      "narcomenudeo": 4.5,
+      "otro": 1.0,
+      "parricidio": 10.0,
+      "robo_autopartes": 3.0,
+      "robo_banco": 7.0,
+      "robo_carga_pesada": 5.0,
+      "robo_casa_habitacion": 7.0,
+      "robo_cuentahabientes": 7.5,
+      "robo_interior_vehiculo": 4.0,
+      "robo_motocicleta": 6.0,
+      "robo_negocio": 6.0,
+      "robo_persona": 7.5,
+      "robo_vehiculo": 6.5,
+      "secuestro": 10.0,
+      "violacion": 9.5,
+      "violencia_familiar": 6.0
+    }
+  },
+  "cobertura_empate": {
+    "incidentes_totales": 346384,
+    "incidentes_ubicados": 292190,
+    "porcentaje_ubicado": 84.35,
+    "incidentes_sin_colonia_en_fuente": 20683,
+    "incidentes_sin_poligono": 33511,
+    "nombres_unicos": 4018,
+    "nombres_empatados": 2493,
+    "metodos_de_empate": {
+      "exacto": 2092,
+      "sin_empate": 1525,
+      "alterno": 22,
+      "difuso": 354,
+      "ordenado": 25
+    },
+    "principales_sin_poligono": [
+      {
+        "municipio": "14039",
+        "colonia": "LAFAYETTE",
+        "incidentes": 2174
+      },
+      {
+        "municipio": "14097",
+        "colonia": "FRACC. CHULAVISTA",
+        "incidentes": 1779
+      },
+      {
+        "municipio": "14039",
+        "colonia": "CAPILLA DE JESUS",
+        "incidentes": 1736
+      },
+      {
+        "municipio": "14039",
+        "colonia": "SANTUARIO",
+        "incidentes": 1631
+      },
+      {
+        "municipio": "14039",
+        "colonia": "LOMAS DEL PARAISO",
+        "incidentes": 1258
+      },
+      {
+        "municipio": "14039",
+        "colonia": "ANTIGUA PENAL DE OBLATOS",
+        "incidentes": 841
+      },
+      {
+        "municipio": "14120",
+        "colonia": "RES. VICTORIA",
+        "incidentes": 669
+      },
+      {
+        "municipio": "14039",
+        "colonia": "JARDS. DEL BOSQUE CENTRO",
+        "incidentes": 635
+      },
+      {
+        "municipio": "14039",
+        "colonia": "RES. LA CRUZ",
+        "incidentes": 620
+      },
+      {
+        "municipio": "14039",
+        "colonia": "INFONAVIT EL SAUZ",
+        "incidentes": 600
+      },
+      {
+        "municipio": "14039",
+        "colonia": "SAGRADO CORAZON",
+        "incidentes": 583
+      },
+      {
+        "municipio": "14098",
+        "colonia": "CERRO EL GACHUPIN",
+        "incidentes": 515
+      },
+      {
+        "municipio": "14039",
+        "colonia": "GRAL. REAL",
+        "incidentes": 495
+      },
+      {
+        "municipio": "14070",
+        "colonia": "LAS PINTAS CENTRO",
+        "incidentes": 494
+      },
+      {
+        "municipio": "14098",
+        "colonia": "CERRO DEL TESORO",
+        "incidentes": 485
+      },
+      {
+        "municipio": "14039",
+        "colonia": "FLORES MAGON",
+        "incidentes": 438
+      },
+      {
+        "municipio": "14039",
+        "colonia": "EL PORVENIR",
+        "incidentes": 375
+      },
+      {
+        "municipio": "14039",
+        "colonia": "BARRERA",
+        "incidentes": 368
+      },
+      {
+        "municipio": "14039",
+        "colonia": "SAN FELIPE SECC. II",
+        "incidentes": 352
+      },
+      {
+        "municipio": "14120",
+        "colonia": "RES. LOMA BONITA",
+        "incidentes": 350
+      },
+      {
+        "municipio": "14039",
+        "colonia": "ARCOS SUR",
+        "incidentes": 338
+      },
+      {
+        "municipio": "14097",
+        "colonia": "VILLA FONTANA AQUA RES.",
+        "incidentes": 338
+      },
+      {
+        "municipio": "14039",
+        "colonia": "JARDS. DEL VALLE",
+        "incidentes": 336
+      },
+      {
+        "municipio": "14098",
+        "colonia": "LOMA BONITA",
+        "incidentes": 335
+      },
+      {
+        "municipio": "14098",
+        "colonia": "RES. VILLAS FONTANA",
+        "incidentes": 330
+      },
+      {
+        "municipio": "14039",
+        "colonia": "RNDA. DE LA ARBOLEDA",
+        "incidentes": 306
+      },
+      {
+        "municipio": "14097",
+        "colonia": "FRACC. LOMAS DEL MIRADOR",
+        "incidentes": 297
+      },
+      {
+        "municipio": "14039",
+        "colonia": "LA NOPALERA",
+        "incidentes": 278
+      },
+      {
+        "municipio": "14120",
+        "colonia": "MESA COLORADA",
+        "incidentes": 275
+      },
+      {
+        "municipio": "14039",
+        "colonia": "LAGOS DE OTE. ANEXO",
+        "incidentes": 274
+      }
+    ]
+  },
+  "fuentes": [
+    {
+      "clave": "inegi_mg_2025",
+      "nombre": "Marco Geoestadístico 2025 — Jalisco",
+      "institucion": "INEGI",
+      "url": "https://www.inegi.org.mx/contenidos/productos/prod_serv/contenidos/espanol/bvinegi/productos/geografia/marcogeo/794551163061/14_jalisco.zip",
+      "cadencia": "anual (~diciembre)",
+      "notas": "OJO: viene en EPSG:6372 (MEXICO_ITRF_2008_LCC), no en WGS84. 129 MB porque incluye manzanas y ejes de vialidad de todo Jalisco."
+    },
+    {
+      "clave": "inegi_censo_2020_ageb",
+      "nombre": "Censo 2020 — resultados por AGEB y manzana urbana, Jalisco",
+      "institucion": "INEGI",
+      "url": "https://www.inegi.org.mx/contenidos/programas/ccpv/2020/datosabiertos/ageb_manzana/ageb_mza_urbana_14_cpv2020_csv.zip",
+      "cadencia": "decenal (próximo censo 2030)",
+      "notas": "Filtrar NOM_LOC = 'Total AGEB urbana' para quedarse con el nivel AGEB. Los valores confidenciales vienen como '*' y hay que tratarlos como nulos."
+    },
+    {
+      "clave": "iieg_colonias_2024",
+      "nombre": "Colonias de Jalisco con información sociodemográfica",
+      "institucion": "IIEG Jalisco",
+      "url": "https://iieg.gob.mx/ns/wp-content/uploads/2024/11/SHAPEColonias20202024.zip",
+      "cadencia": "irregular",
+      "notas": "Viene en EPSG:32613. Llave GEOCOL. El marco de referencia es del INE 2024, así que las colonias son las secciones del padrón electoral agrupadas, no una división administrativa municipal."
+    },
+    {
+      "clave": "iieg_colonias_delitos",
+      "nombre": "Incidencia delictiva por colonia — Jalisco 2016 a feb 2021",
+      "institucion": "IIEG Jalisco (con datos de la Fiscalía del Estado)",
+      "url": "https://iieg.gob.mx/ns/wp-content/uploads/2021/03/FEB2021.zip",
+      "cadencia": "DESCONTINUADA",
+      "notas": "LIMITACIÓN CENTRAL DEL PROYECTO: la serie termina en febrero de 2021. Se verificó que no existen entregas posteriores (DIC2021 a 2025 devuelven 404). Identifica la colonia por NOMBRE, no por clave, así que requiere el empate difuso de georisk.nombres. No incluye hora del hecho, por lo que NO permite análisis diurno vs nocturno."
+    },
+    {
+      "clave": "sesnsp_municipal",
+      "nombre": "Incidencia delictiva del Fuero Común, nivel municipal",
+      "institucion": "SESNSP",
+      "url": "https://www.gob.mx/sesnsp/acciones-y-programas/datos-abiertos-de-incidencia-delictiva",
+      "cadencia": "mensual",
+      "notas": "DESCARGA MANUAL: el enlace real vive en sharepoint y no es estable. NO contiene coordenadas ni colonia; es la razón por la que el clustering espacial de delitos no es viable con datos públicos. Se usa como capa de tendencia reciente, no de detalle geográfico."
+    }
+  ]
+}

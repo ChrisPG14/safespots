@@ -1,0 +1,33 @@
+@import "tailwindcss";
+
+@theme inline {
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+/*
+ * La interfaz se fija en claro a propósito y no sigue el tema del sistema.
+ * El mapa base y la rampa de color del riesgo (amarillo a rojo) están
+ * calibrados sobre fondo claro; invertirlos en modo oscuro cambiaría la
+ * lectura de los colores, que es justo lo que el mapa comunica.
+ */
+html {
+  color-scheme: light;
+}
+
+body {
+  background: #f5f5f4; /* stone-100 */
+  color: #1c1917; /* stone-900 */
+  font-family: var(--font-sans), system-ui, sans-serif;
+  /* El mapa gestiona su propio desplazamiento; el de la página estorba. */
+  overscroll-behavior: none;
+}
+
+/* Controles de MapLibre un poco más discretos que el estilo por omisión. */
+.maplibregl-ctrl-group {
+  box-shadow: 0 1px 3px rgb(0 0 0 / 0.15) !important;
+}
+
+.maplibregl-ctrl-attrib {
+  font-size: 10px;
+}

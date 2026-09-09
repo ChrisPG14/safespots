@@ -1,0 +1,41 @@
+# Secretos y configuración local
+.env
+.env.local
+.env.*.local
+!.env.example
+
+# Datos descargados (pesados, se regeneran con el ETL)
+data/raw/
+data/interim/
+data/processed/
+*.shp
+*.shx
+*.dbf
+*.prj
+*.cpg
+*.gpkg
+*.zip
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+*.egg-info/
+
+# Node (el detalle vive en web/.gitignore)
+node_modules/
+
+# Sistema operativo y editores
+.DS_Store
+*.swp
+.idea/
+.vscode/*
+!.vscode/extensions.json
+
+# Salidas de análisis
+*.log
+notebooks/.ipynb_checkpoints/
