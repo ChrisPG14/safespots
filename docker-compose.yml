@@ -1,0 +1,31 @@
+# Base de datos local para desarrollo.
+# En producción usamos Postgres administrado (Neon/Supabase) con PostGIS habilitado.
+#
+# Arrancar:  docker compose up -d
+# Conectar:  psql "postgresql://geo:geo@localhost:5433/georisk"
+#
+# Nota: el puerto host es 5433 para no chocar con un Postgres del sistema en 5432.
+
+services:
+  db:
+    image: postgis/postgis:17-3.5
+    container_name: georisk-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: geo
+      POSTGRES_PASSWORD: geo
+      POSTGRES_DB: georisk
+      # Español de México para ordenamientos y mensajes coherentes con los datos
+      LANG: es_MX.utf8
+    ports:
+      - "5433:5432"
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U geo -d georisk"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  db_data:

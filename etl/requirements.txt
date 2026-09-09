@@ -1,0 +1,23 @@
+# Versiones fijadas a propósito: el stack geoespacial rompe compatibilidad
+# seguido y un proyecto académico tiene que poder reproducirse meses después.
+#
+# pyogrio trae GDAL embebido en el wheel, así que NO hace falta instalar GDAL
+# en el sistema ni tener ogr2ogr disponible.
+
+geopandas==1.1.4
+pyogrio==0.13.0
+shapely==2.1.2
+pyproj==3.8.0
+pandas==3.0.5
+numpy==2.5.3
+
+psycopg[binary]==3.3.5
+
+requests==2.34.2
+python-dotenv==1.2.3
+
+# DBSCAN y Random Forest. El clustering también se puede hacer dentro de
+# PostGIS con ST_ClusterDBSCAN; scikit-learn se usa para el modelo supervisado
+# y para validar resultados fuera de la base.
+scikit-learn==1.9.0
+scipy==1.18.1
