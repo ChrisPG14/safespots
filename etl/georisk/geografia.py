@@ -48,6 +48,14 @@ def _reparar_y_normalizar(
         print(f"    descartando {vacias.sum()} geometría(s) vacía(s)")
         gdf = gdf.loc[~vacias].copy()
 
+    # Reindexar tras filtrar. Es indispensable, no cosmético: quien construya
+    # después un GeoDataFrame mezclando estas columnas con una Serie nueva
+    # —que nace con índice 0..n-1— haría que pandas alinee por índice y
+    # generara la UNIÓN de ambos, es decir filas fantasma con geometría nula.
+    # Ese fue exactamente el origen de un 'NoneType' object has no attribute
+    # 'wkb' al volcar municipios a PostGIS.
+    gdf = gdf.reset_index(drop=True)
+
     # El área se calcula en el CRS métrico, no en grados. Calcularla en 4326
     # devuelve "grados cuadrados", que no significan nada.
     gdf["area_m2"] = gdf.geometry.to_crs(epsg=CRS_METRICO).area
@@ -272,7 +280,9 @@ def cargar_municipios(solo_nucleo: bool = True) -> gpd.GeoDataFrame:
             "clave": gdf["CVEGEO"],
             "nombre": gdf[col_nombre] if col_nombre else gdf["CVEGEO"],
             "municipio_clave": gdf["CVEGEO"],
-            "poblacion": pd.Series([pd.NA] * len(gdf), dtype="Int64"),
+            # index=gdf.index de forma explícita: una Serie nueva sin índice
+            # arrastraría a pandas a alinear y producir filas nulas.
+            "poblacion": pd.Series(pd.NA, index=gdf.index, dtype="Int64"),
             "area_m2": gdf["area_m2"],
             "fuente": MARCO_GEOESTADISTICO.clave,
             "fuente_version": "MG2025",
