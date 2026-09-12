@@ -120,8 +120,18 @@ docker compose up -d
 ./db/apply.sh "postgresql://geo:geo@localhost:5433/georisk"
 
 cd etl
+export DATABASE_URL="postgresql://geo:geo@localhost:5433/georisk"
 PYTHONPATH=. .venv/bin/python -m georisk.cli cargar-db
 ```
+
+Si tu usuario no pertenece al grupo `docker` hará falta `sudo` en el primer
+comando. Basta con eso: una vez levantado el contenedor publica el puerto 5433
+en `localhost` y el resto del flujo corre sin privilegios.
+
+Al terminar, la base queda con 2,068 colonias, 156,346 filas de incidencia que
+suman exactamente los 292,190 incidentes ubicados, y 10,340 filas de riesgo
+(2,068 colonias × 5 perfiles). El comando imprime ese conteo para que puedas
+verificar el cuadre.
 
 ---
 
@@ -218,7 +228,12 @@ Dos errores que se encontraron y corrigieron aquí, por si sirven de advertencia
 ```
 app/
 ├── db/
-│   ├── migrations/          esquema PostGIS, aplicado en orden
+│   ├── migrations/
+│   │   ├── 0001_base_geografica.sql   extensiones y unidades geográficas
+│   │   ├── 0002_incidencia.sql        taxonomía de delitos e incidencia
+│   │   ├── 0003_riesgo.sql            índice de riesgo, perfiles y hotspots
+│   │   ├── 0004_calidad_dato.sql      vocabulario real de calidad_dato
+│   │   └── 0005_indice_geografia.sql  índice en metros y riesgo_cerca_de()
 │   └── apply.sh             aplica lo pendiente, idempotente
 ├── etl/
 │   ├── requirements.txt
@@ -261,6 +276,26 @@ clase `maplibregl-map`, cuya regla `position: relative` gana al utilitario
 `absolute` de Tailwind. Si la altura del contenedor dependía de
 `absolute inset-0`, el div queda con altura cero y el mapa no aparece. La altura
 se da con `h-full`.
+
+**Para buscar por radio, no consultes la vista.** `v_riesgo_vigente` lleva un
+`DISTINCT ON`, y eso obliga al planificador a materializar las 2,068 unidades
+antes de poder aplicar cualquier filtro espacial: el índice queda inutilizado
+aunque exista. Además, un predicado sobre `geom::geography` no puede usar el
+índice construido sobre `geom`, porque el casteo produce un valor distinto del
+indexado. Para eso está la función `riesgo_cerca_de(lon, lat, radio, perfil)`,
+que filtra por espacio primero y se apoya en un índice funcional sobre la
+expresión casteada. Baja la consulta de 120 ms a 12.85 ms.
+
+**Las locales de español no existen en la imagen de PostGIS.** Definir
+`LANG=es_MX.utf8` en `docker-compose.yml` hace que `initdb` aborte y el
+contenedor muera al arrancar, aunque `docker compose up` lo reporte como
+"Started". La imagen solo trae generadas `C.UTF-8` y `en_US.utf8`.
+
+**`groupby` de pandas descarta filas en silencio.** Si cualquier columna de
+agrupación trae nulos, esas filas desaparecen sin aviso. Aquí costó 4,230
+incidentes que el reporte daba por ubicados y que en la base no estaban. El ETL
+ahora incluye un cuadre obligatorio que lanza una excepción ante cualquier
+descuadre entre lo ubicado y lo agregado.
 
 **Los CRS de las fuentes oficiales no son WGS84.** El Marco Geoestadístico del
 INEGI viene en EPSG:6372 y las colonias del IIEG en EPSG:32613. Ignorarlo
