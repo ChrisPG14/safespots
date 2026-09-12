@@ -25,6 +25,17 @@ from .taxonomia import ALIAS_IIEG
 # Nombre del CSV dentro del ZIP del IIEG.
 _CSV_ESPERADO = "delitos_colonia_paginaweb_feb21.csv"
 
+# Nombre de mes -> número. Sirve para reparar un hueco real de la fuente: en
+# 3,591 filas la columna `Número_mes` viene vacía mientras que `Mes` sí dice
+# "Septiembre". Sin esta reparación esas filas desaparecen en el groupby sin
+# dejar rastro, porque pandas descarta por omisión las filas cuya clave de
+# agrupación es nula.
+_MESES: dict[str, int] = {
+    "ENERO": 1, "FEBRERO": 2, "MARZO": 3, "ABRIL": 4,
+    "MAYO": 5, "JUNIO": 6, "JULIO": 7, "AGOSTO": 8,
+    "SEPTIEMBRE": 9, "OCTUBRE": 10, "NOVIEMBRE": 11, "DICIEMBRE": 12,
+}
+
 
 @dataclass
 class ReporteEmpate:
@@ -34,6 +45,8 @@ class ReporteEmpate:
     incidentes_ubicados: int = 0
     incidentes_sin_colonia: int = 0   # la fuente dice "N.D."
     incidentes_sin_empate: int = 0    # tiene nombre pero no existe polígono
+    incidentes_sin_periodo: int = 0   # no se pudo determinar el mes
+    meses_recuperados: int = 0        # mes deducido del nombre del mes
     nombres_unicos: int = 0
     nombres_empatados: int = 0
     por_metodo: dict[str, int] = field(default_factory=dict)
@@ -61,6 +74,16 @@ class ReporteEmpate:
             f"    nombre sin polígono:    {self.incidentes_sin_empate:>9,}  "
             f"({100 * self.incidentes_sin_empate / max(self.incidentes_totales, 1):.1f}%)"
         )
+        if self.incidentes_sin_periodo:
+            print(
+                f"    sin periodo utilizable: {self.incidentes_sin_periodo:>9,}  "
+                f"({100 * self.incidentes_sin_periodo / max(self.incidentes_totales, 1):.1f}%)"
+            )
+        if self.meses_recuperados:
+            print(
+                f"    mes recuperado:         {self.meses_recuperados:>9,}  "
+                f"(deducido del nombre del mes)"
+            )
         print(
             f"    nombres únicos:         {self.nombres_empatados:>9,} de "
             f"{self.nombres_unicos:,} empatados"
@@ -132,6 +155,49 @@ def cargar_incidencia(
 
     reporte = ReporteEmpate()
     reporte.incidentes_totales = int(df["Cantidad"].sum())
+
+    # --- periodo -----------------------------------------------------------
+    # Reparar el mes antes de cualquier agrupación. La fuente deja vacío
+    # `Número_mes` en varios miles de filas de septiembre pero conserva el
+    # nombre del mes; se verificó que la correspondencia nombre -> número es
+    # 1:1 en el resto del archivo, así que deducirlo es seguro.
+    df["anio"] = pd.to_numeric(df["Año"], errors="coerce").astype("Int64")
+    mes = pd.to_numeric(df["Número_mes"], errors="coerce").astype("Int64")
+
+    falta_mes = mes.isna()
+    if falta_mes.any():
+        desde_nombre = (
+            df.loc[falta_mes, "Mes"]
+            .astype("string")
+            .str.strip()
+            .str.upper()
+            .map(_MESES)
+            .astype("Int64")
+        )
+        recuperadas = desde_nombre.notna()
+        reporte.meses_recuperados = int(
+            df.loc[falta_mes].loc[recuperadas, "Cantidad"].sum()
+        )
+        mes = mes.fillna(desde_nombre)
+        if reporte.meses_recuperados:
+            print(
+                f"    recuperado el mes desde su nombre en "
+                f"{int(recuperadas.sum()):,} fila(s) "
+                f"({reporte.meses_recuperados:,} incidentes)"
+            )
+    df["mes"] = mes
+
+    # Lo que siga sin periodo válido no se puede ubicar en el tiempo. Se
+    # descarta de forma EXPLÍCITA y se contabiliza, en vez de dejar que el
+    # groupby lo haga en silencio.
+    sin_periodo = df["anio"].isna() | df["mes"].isna() | ~df["mes"].between(1, 12)
+    if sin_periodo.any():
+        reporte.incidentes_sin_periodo = int(df.loc[sin_periodo, "Cantidad"].sum())
+        print(
+            f"    AVISO: {int(sin_periodo.sum()):,} fila(s) sin periodo utilizable "
+            f"({reporte.incidentes_sin_periodo:,} incidentes); se excluyen"
+        )
+        df = df.loc[~sin_periodo].copy()
 
     # --- delito canónico ---------------------------------------------------
     # Se normaliza a mayúsculas sin espacios extra antes de buscar, porque la
@@ -207,15 +273,30 @@ def cargar_incidencia(
     # misma clave canónica y hay que sumarlas, no dejarlas duplicadas.
     salida = (
         ubicados.groupby(
-            ["clave", "municipio_clave", "delito_clave", "Año", "Número_mes"],
+            ["clave", "municipio_clave", "delito_clave", "anio", "mes"],
             as_index=False,
+            dropna=False,
         )["Cantidad"]
         .sum()
-        .rename(columns={"Año": "anio", "Número_mes": "mes", "Cantidad": "conteo"})
+        .rename(columns={"Cantidad": "conteo"})
     )
     salida["anio"] = salida["anio"].astype(int)
     salida["mes"] = salida["mes"].astype(int)
     salida["fuente"] = INCIDENCIA_COLONIAS.clave
+
+    # Cuadre obligatorio. Un groupby descarta en silencio las filas cuya clave
+    # de agrupación sea nula, y así se perdieron 4,230 incidentes sin que nada
+    # lo delatara: el reporte los daba por ubicados y en la base no estaban.
+    # Esta comprobación convierte ese fallo mudo en un error ruidoso.
+    agregado = int(salida["conteo"].sum())
+    if agregado != reporte.incidentes_ubicados:
+        raise RuntimeError(
+            "Descuadre al agregar la incidencia: se ubicaron "
+            f"{reporte.incidentes_ubicados:,} incidentes pero la tabla agregada "
+            f"suma {agregado:,} (diferencia de "
+            f"{reporte.incidentes_ubicados - agregado:,}).\n"
+            "  Suele significar que alguna columna de agrupación trae nulos."
+        )
 
     print(f"    {len(salida):,} filas agregadas (colonia-delito-año-mes)")
     return salida, reporte

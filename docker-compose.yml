@@ -15,8 +15,17 @@ services:
       POSTGRES_USER: geo
       POSTGRES_PASSWORD: geo
       POSTGRES_DB: georisk
-      # Español de México para ordenamientos y mensajes coherentes con los datos
-      LANG: es_MX.utf8
+      # NO definir LANG con una locale de español aquí.
+      #
+      # La imagen postgis/postgis se basa en Debian y solo trae generadas las
+      # locales C.UTF-8 y en_US.utf8. Poner LANG=es_MX.utf8 hace que initdb
+      # aborte con "invalid locale settings" y el contenedor muera al arrancar,
+      # dejando el volumen a medio inicializar. El síntoma es confuso porque
+      # `docker compose up` reporta el contenedor como "Started".
+      #
+      # El ordenamiento alfabético de los nombres de colonia se resuelve en la
+      # interfaz con Intl.Collator de JavaScript, que sí conoce el español, así
+      # que la base no necesita una locale especial.
     ports:
       - "5433:5432"
     volumes:
