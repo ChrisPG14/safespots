@@ -233,8 +233,10 @@ app/
 │   │   ├── 0002_incidencia.sql        taxonomía de delitos e incidencia
 │   │   ├── 0003_riesgo.sql            índice de riesgo, perfiles y hotspots
 │   │   ├── 0004_calidad_dato.sql      vocabulario real de calidad_dato
-│   │   └── 0005_indice_geografia.sql  índice en metros y riesgo_cerca_de()
-│   └── apply.sh             aplica lo pendiente, idempotente
+│   │   ├── 0005_indice_geografia.sql  índice en metros y riesgo_cerca_de()
+│   │   └── 0006_vista_densidad.sql    la vista expone ambas tasas
+│   ├── apply.sh             aplica lo pendiente, idempotente
+│   └── benchmark.sh         mide las consultas espaciales, reproducible
 ├── etl/
 │   ├── requirements.txt
 │   └── georisk/
@@ -259,6 +261,38 @@ app/
 ```
 
 ---
+
+## Desempeño medido
+
+Cifras obtenidas con `./db/benchmark.sh --completo` sobre las 2,068 colonias
+cargadas, en una máquina de escritorio con PostgreSQL 17.5 y PostGIS 3.5.2 en
+contenedor. De cada consulta se toma el mejor de cinco ejecuciones con caché
+caliente, porque interesa el costo de la operación en régimen y no el primer
+acceso a disco.
+
+| Consulta | Sin índice | Con índice GiST | Mejora |
+|---|---:|---:|---:|
+| Punto en polígono (¿qué colonia es esta?) | 1.23 ms | **0.23 ms** | 5.3× |
+| Viewport del mapa (recuadro) | 1.94 ms | **1.21 ms** | 1.6× |
+| Riesgo en radio de 2 km | 124.29 ms | **13.07 ms** | 9.5× |
+| Asignar 100,000 puntos a su colonia | 636.15 s | **3.42 s** | **186×** |
+
+Tres lecturas honestas de esta tabla:
+
+**Con 2,068 polígonos el índice aporta poco en consultas simples.** El recorrido
+secuencial sobre una tabla tan chica ya es rápido, así que las dos primeras
+filas mejoran de forma modesta. Presumir de órdenes de magnitud ahí sería
+engañoso.
+
+**Donde el índice decide todo es en el volumen.** Asignar 100 mil puntos a su
+colonia pasa de diez minutos y medio a tres segundos y medio: un factor de 186.
+Ese es el escenario que justifica PostGIS frente a una hoja de cálculo o un
+script que recorra los polígonos a mano, y es también el que habría que correr
+si algún día llegan datos delictivos geolocalizados.
+
+**La tercera fila no compara índice sí/no, sino vista contra función.** La
+mejora de 9.5× salió de rediseñar la consulta, no de agregar hardware: ver la
+nota sobre `riesgo_cerca_de` más abajo.
 
 ## Notas de implementación que ahorran horas
 
