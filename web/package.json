@@ -9,7 +9,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "worker": "node scripts/copiar-worker-maplibre.mjs"
+    "worker": "node scripts/copiar-worker-maplibre.mjs",
+    "test": "tsc -p tsconfig.test.json && node --test .test-output/tests/*.test.js"
   },
   "dependencies": {
     "maplibre-gl": "^6.8.0",

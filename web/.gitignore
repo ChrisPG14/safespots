@@ -42,3 +42,6 @@ next-env.d.ts
 
 # Worker de MapLibre copiado desde node_modules por scripts/copiar-worker-maplibre.mjs
 /public/maplibre/
+
+# Compilación de pruebas
+/.test-output/
