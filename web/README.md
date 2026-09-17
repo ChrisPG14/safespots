@@ -1,36 +1,106 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# SafeSpots — aplicación web
 
-## Getting Started
+Interfaz de SafeSpots: mapa de riesgo por colonia de la Zona Metropolitana de
+Guadalajara y asistente de orientación.
 
-First, run the development server:
+**La documentación del proyecto vive en el [README de la raíz](../README.md).**
+Ahí están la metodología, las fuentes, los resultados medidos y la
+correspondencia con el reporte académico. Este archivo cubre solo lo específico
+de la aplicación web.
+
+## Desarrollo
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npm install
+npm run dev     # http://localhost:3000
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+El mapa lee `public/datos/colonias-riesgo.geojson` y `public/datos/meta.json`,
+que **produce el ETL**, no la aplicación. Si faltan, la página lo dice y explica
+qué comando correr. Para regenerarlos:
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```bash
+cd ../etl && PYTHONPATH=. .venv/bin/python -m georisk.cli construir
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Asistente
 
-## Learn More
+Para habilitarlo, pon una clave de [Google AI Studio](https://aistudio.google.com/apikey)
+en el `.env` **de la raíz del proyecto** (no en `web/`):
 
-To learn more about Next.js, take a look at the following resources:
+```dotenv
+GEMINI_API_KEY=tu_clave
+GEMINI_MODEL=gemini-2.5-flash
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+**No hace falta reiniciar el servidor:** `configuracionGemini()` relee el archivo
+en cada petición. Guardar el `.env` basta.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+También se admiten variables de entorno del despliegue o un `web/.env.local`,
+que tienen prioridad sobre el `.env` de la raíz. La clave se usa únicamente en el
+servidor; nunca con el prefijo `NEXT_PUBLIC_`, que la publicaría en el navegador.
 
-## Deploy on Vercel
+Sin clave, el mapa funciona igual y el asistente responde que todavía no está
+habilitado, con HTTP 503 y un mensaje explícito.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+### Cómo usarlo
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+1. Busca o toca una colonia, o pulsa **Mi ubicación** (requiere permiso del
+   navegador y HTTPS, salvo en localhost).
+2. Abre **Asistente IA**, elige turismo, renta o estacionamiento e indica tu
+   máximo en MXN por noche, mes u hora respectivamente.
+3. Elige el radio y, opcionalmente, escribe tus preferencias.
+
+### Qué hace el endpoint
+
+`POST /api/asesor` valida la consulta, lee los datos en el servidor, filtra por
+radio con la distancia a la **superficie** de la colonia —no a su centro— y
+descarta las muestras insuficientes. Ordena hasta 24 candidatas por el promedio
+de los índices relevantes más una penalización por distancia de hasta 20 puntos.
+Gemini recibe esa lista y redacta; las identidades y métricas de la respuesta se
+validan contra ella, así que el modelo no puede inventar colonias.
+
+Las coordenadas del dispositivo **no se envían al proveedor**: se usan solo en
+nuestro servidor para calcular distancias.
+
+Usa [salida estructurada](https://ai.google.dev/gemini-api/docs/generate-content/structured-output).
+Hay timeout de 35 s, manejo de cuota y de respuesta incompleta, y un tope de 20
+consultas por minuto con 3 concurrentes **por proceso**. Un despliegue con varias
+instancias necesita además cuota compartida o autenticación.
+
+### Alcance de las recomendaciones
+
+El dataset termina en **febrero de 2021**. No hay seguridad en tiempo real,
+inventario de alojamientos, precios, disponibilidad ni estacionamientos
+verificados. El presupuesto orienta qué verificar; no garantiza que una colonia
+tenga ofertas dentro de ese importe. El perfil vehicular incluye homicidio
+culposo además de los robos relacionados con vehículos.
+
+## Verificación
+
+```bash
+npm test         # 9 pruebas, Gemini simulado, sin gastar cuota
+npm run lint
+npm run build
+```
+
+## Notas de implementación
+
+Dos incompatibilidades documentadas en detalle en el README de la raíz, que
+conviene conocer antes de tocar el mapa:
+
+- **El worker de MapLibre** no funciona bajo el empaquetador de Next.js sin
+  `setWorkerUrl`. El síntoma es un mapa que carga sin errores pero cuyas capas
+  de datos nunca aparecen. Lo resuelve `scripts/copiar-worker-maplibre.mjs`, que
+  corre solo en `predev` y `prebuild`.
+- **El CSS de MapLibre vence a Tailwind** en el contenedor del mapa: su regla
+  `position: relative` gana al utilitario `absolute`. La altura se da con
+  `h-full`.
+
+## Marca
+
+El logotipo es una sola silueta que lee como escudo y como pin de mapa a la vez,
+con el punto central **calado** para que funcione en un solo color sobre
+cualquier fondo. Vive en dos lugares que deben mantenerse iguales:
+[`components/Logo.tsx`](components/Logo.tsx) para la cabecera y
+[`app/icon.svg`](app/icon.svg) para el favicon.
