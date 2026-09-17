@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" role="img" aria-label="SafeSpots">
+  <!--
+    Marca de SafeSpots.
+
+    Una sola silueta que lee como escudo y como pin de mapa a la vez: hombros
+    rectos arriba (escudo = "safe") y punta abajo (pin = "spots"). El círculo
+    central va calado con fill-rule evenodd, no pintado encima, para que la
+    marca funcione sobre cualquier fondo y siga siendo un solo color.
+
+    Se dibuja sobre cuadrado redondeado porque a 16 px en una pestaña del
+    navegador una silueta suelta se pierde; el contraste del fondo la sostiene.
+  -->
+  <rect width="32" height="32" rx="9" fill="#0f766e"/>
+  <path fill="#ffffff" fill-rule="evenodd" d="
+    M16 6.2
+    L23.4 9.0
+    v6.0
+    c0 4.7-3.0 8.9-7.4 10.5
+    c-4.4-1.6-7.4-5.8-7.4-10.5
+    V9.0
+    Z
+    M16 12.6
+    a2.7 2.7 0 1 0 0 5.4
+    a2.7 2.7 0 1 0 0-5.4
+    Z
+  "/>
+</svg>

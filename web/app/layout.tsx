@@ -13,13 +13,16 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Riesgo delictivo por colonia · Zona Metropolitana de Guadalajara",
+  title: "SafeSpots · Colonias de Guadalajara, con datos",
   description:
-    "Mapa analítico de incidencia delictiva por colonia en la ZMG, construido " +
-    "con datos oficiales del IIEG Jalisco y el INEGI. Índice de riesgo por " +
-    "perfil: peatonal, vehicular, residencial y comercial.",
+    "Mapa analítico de incidencia delictiva por colonia en la Zona " +
+    "Metropolitana de Guadalajara, construido con datos oficiales del IIEG " +
+    "Jalisco y el INEGI. Índice de riesgo por perfil: peatonal, vehicular, " +
+    "residencial y comercial.",
+  applicationName: "SafeSpots",
   authors: [{ name: "Christian Moisés de Alba Velarde" }],
   keywords: [
+    "SafeSpots",
     "Guadalajara",
     "seguridad",
     "incidencia delictiva",
@@ -29,14 +32,16 @@ export const metadata: Metadata = {
     "INEGI",
     "PostGIS",
   ],
+  // El icono lo resuelve app/icon.svg por convención del App Router; se
+  // declara aquí también para que quede explícito de dónde sale la marca.
+  icons: { icon: "/icon.svg" },
 };
 
 export const viewport: Viewport = {
-  // El mapa ocupa toda la pantalla, así que conviene evitar el zoom por
-  // doble toque del navegador: interfiere con el zoom del propio mapa.
   width: "device-width",
   initialScale: 1,
-  maximumScale: 1,
+  viewportFit: "cover",
+  themeColor: "#0f766e",
 };
 
 export default function RootLayout({

@@ -6,6 +6,7 @@ import {
   // Se importa con alias: `Map` a secas taparía el Map de JavaScript, que
   // este componente usa para el índice de municipios.
   MapLibreMap,
+  Marker,
   NavigationControl,
   ScaleControl,
   setWorkerUrl,
@@ -27,8 +28,14 @@ import {
   decimal,
   esEstrato,
   numero,
+  TEXTO_SOBRE_ESTRATO,
 } from "@/lib/riesgo";
 import type { Meta, Perfil, PropiedadesColonia } from "@/lib/tipos";
+
+import AsesorColonia from "./AsesorColonia";
+import { limitesColonia, normalizarBusqueda, puntoColonia, type Colonia, type Coordenadas, type DatosColonias } from "@/lib/geografia";
+import type { Objetivo } from "@/lib/asesor";
+import Logo from "./Logo";
 
 const URL_GEOJSON = "/datos/colonias-riesgo.geojson";
 const FUENTE = "colonias";
@@ -119,6 +126,8 @@ interface Props {
 export default function MapaRiesgo({ meta }: Props) {
   const contenedor = useRef<HTMLDivElement>(null);
   const mapa = useRef<MapLibreMap | null>(null);
+  const ubicacionMarker = useRef<Marker | null>(null);
+  const solicitudUbicacion = useRef(0);
   const claveResaltada = useRef<string | null>(null);
 
   const [listo, setListo] = useState(false);
@@ -126,6 +135,17 @@ export default function MapaRiesgo({ meta }: Props) {
   const [perfilActivo, setPerfilActivo] = useState(meta.perfiles[0].clave);
   const [seleccion, setSeleccion] = useState<PropiedadesColonia | null>(null);
   const [panelAbierto, setPanelAbierto] = useState(false);
+  const [colonias, setColonias] = useState<Colonia[]>([]);
+  const [busqueda, setBusqueda] = useState("");
+  const [nombres, setNombres] = useState(true);
+  const [vista, setVista] = useState<"explorar" | "asesor">("explorar");
+  const [objetivo, setObjetivo] = useState<Objetivo>("turismo");
+  const [referencia, setReferencia] = useState<PropiedadesColonia | null>(null);
+  const [ubicacion, setUbicacion] = useState<Coordenadas | null>(null);
+  const [precisionUbicacion, setPrecisionUbicacion] = useState<number | null>(null);
+  const [ajustandoUbicacion, setAjustandoUbicacion] = useState(false);
+  const [ubicando, setUbicando] = useState(false);
+  const [errorUbicacion, setErrorUbicacion] = useState<string | null>(null);
   const [metodologiaAbierta, setMetodologiaAbierta] = useState(false);
 
   const perfil = useMemo(
@@ -212,13 +232,16 @@ export default function MapaRiesgo({ meta }: Props) {
       console.error("MapLibre:", e.error?.message ?? e);
     });
 
+    const controller = new AbortController();
     m.on("load", async () => {
       try {
-        const resp = await fetch(URL_GEOJSON);
+        const resp = await fetch(URL_GEOJSON, { signal: controller.signal });
         if (!resp.ok) {
           throw new Error(`El servidor respondió ${resp.status} al pedir la capa de riesgo`);
         }
-        const geojson = await resp.json();
+        const geojson: DatosColonias = await resp.json();
+        if (controller.signal.aborted) return;
+        setColonias(geojson.features);
 
         m.addSource(FUENTE, {
           type: "geojson",
@@ -266,6 +289,7 @@ export default function MapaRiesgo({ meta }: Props) {
 
         setListo(true);
       } catch (err) {
+        if (controller.signal.aborted) return;
         setError(
           err instanceof Error
             ? err.message
@@ -281,7 +305,10 @@ export default function MapaRiesgo({ meta }: Props) {
     observador.observe(contenedor.current);
 
     return () => {
+      controller.abort();
+      solicitudUbicacion.current++;
       observador.disconnect();
+      ubicacionMarker.current?.remove();
       m.remove();
       mapa.current = null;
     };
@@ -317,16 +344,22 @@ export default function MapaRiesgo({ meta }: Props) {
 
     const alSalir = () => {
       m.getCanvas().style.cursor = "";
-      if (!seleccion) resaltar(null);
+      resaltar(seleccion ? String(seleccion.clave) : null);
     };
 
     const alHacerClic = (e: MapLayerMouseEvent) => {
+      if (ajustandoUbicacion) return;
       const f = e.features?.[0] as MapGeoJSONFeature | undefined;
       if (!f?.properties) return;
       setSeleccion(f.properties as PropiedadesColonia);
+      setReferencia(f.properties as PropiedadesColonia);
+      setUbicacion(null);
+      solicitudUbicacion.current++;
+      setUbicando(false);
       resaltar(String(f.properties.clave));
     };
 
+    resaltar(seleccion ? String(seleccion.clave) : null);
     m.on("mousemove", CAPA_RELLENO, alEntrar);
     m.on("mouseleave", CAPA_RELLENO, alSalir);
     m.on("click", CAPA_RELLENO, alHacerClic);
@@ -336,7 +369,7 @@ export default function MapaRiesgo({ meta }: Props) {
       m.off("mouseleave", CAPA_RELLENO, alSalir);
       m.off("click", CAPA_RELLENO, alHacerClic);
     };
-  }, [listo, seleccion]);
+  }, [listo, seleccion, ajustandoUbicacion]);
 
   // --- cambio de perfil --------------------------------------------------
   // Solo se reescriben las expresiones de pintado. Los datos ya están en el
@@ -348,6 +381,158 @@ export default function MapaRiesgo({ meta }: Props) {
     m.setPaintProperty(CAPA_RELLENO, "fill-color", expresionColor(perfil));
     m.setPaintProperty(CAPA_RELLENO, "fill-opacity", expresionOpacidad(perfil));
   }, [perfil, listo, expresionColor, expresionOpacidad]);
+
+  const indiceColonias = useMemo(() => colonias.map((colonia) => ({
+    colonia, punto: puntoColonia(colonia),
+    texto: normalizarBusqueda(`${colonia.properties.nombre} ${municipios.get(colonia.properties.municipio_clave) ?? ""}`),
+  })), [colonias, municipios]);
+  const resultados = useMemo(() => {
+    const q = normalizarBusqueda(busqueda);
+    return q.length < 2 ? [] : indiceColonias.filter((c) => c.texto.includes(q)).slice(0, 8);
+  }, [busqueda, indiceColonias]);
+
+  // Etiquetas locales: no dependen de un servicio externo de fuentes.
+  useEffect(() => {
+    const m = mapa.current;
+    if (!m || !listo || !nombres) return;
+    let etiquetas: Marker[] = [];
+    const actualizar = () => {
+      etiquetas.forEach((e) => e.remove());
+      etiquetas = [];
+      if (m.getZoom() < 10.8) return;
+      const ocupados: { x: number; y: number; ancho: number }[] = [];
+      const candidatas = indiceColonias.filter((c) => m.getBounds().contains(c.punto))
+        .sort((a, b) => Number(b.colonia.properties.area_km2) - Number(a.colonia.properties.area_km2));
+      for (const c of candidatas) {
+        const pixel = m.project(c.punto);
+        const ancho = Math.min(180, c.colonia.properties.nombre.length * 6 + 12);
+        if (ocupados.some((o) => Math.abs(o.x - pixel.x) < (ancho + o.ancho) / 2 + 12 && Math.abs(o.y - pixel.y) < 38)) continue;
+        ocupados.push({ x: pixel.x, y: pixel.y, ancho });
+        const elemento = document.createElement("span");
+        elemento.className = "colonia-label";
+        elemento.textContent = c.colonia.properties.nombre;
+        etiquetas.push(new Marker({ element: elemento }).setLngLat(c.punto).addTo(m));
+        if (etiquetas.length >= 45) break;
+      }
+    };
+    actualizar();
+    m.on("moveend", actualizar);
+    m.on("resize", actualizar);
+    return () => { m.off("moveend", actualizar); m.off("resize", actualizar); etiquetas.forEach((e) => e.remove()); };
+  }, [listo, nombres, indiceColonias]);
+
+  function verColonia(clave: string, comoReferencia = false) {
+    const colonia = colonias.find((c) => c.properties.clave === clave);
+    if (!colonia) return;
+    setSeleccion(colonia.properties);
+    if (comoReferencia) { setReferencia(colonia.properties); setUbicacion(null); solicitudUbicacion.current++; setUbicando(false); setAjustandoUbicacion(false); }
+    setBusqueda("");
+    setPanelAbierto(false);
+    const movil = window.innerWidth < 1024;
+    mapa.current?.fitBounds(limitesColonia(colonia), {
+      padding: movil ? { top: 75, left: 35, right: 35, bottom: Math.min(window.innerHeight * 0.38, 300) } : { top: 90, left: 395, right: 365, bottom: 80 },
+      maxZoom: 14, duration: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? 0 : 700,
+    });
+  }
+
+  const fijarPunto = useCallback((punto: Coordenadas, precision: number | null = null) => {
+    const [[oeste, sur], [este, norte]] = VISTA_INICIAL.limites;
+    if (punto[0] < oeste || punto[0] > este || punto[1] < sur || punto[1] > norte) {
+      setErrorUbicacion("Ese punto está fuera de la cobertura de la ZMG. Elige un punto de destino en el mapa.");
+      return false;
+    }
+    setUbicacion(punto);
+    setPrecisionUbicacion(precision);
+    setReferencia(null);
+    setSeleccion(null);
+    setErrorUbicacion(null);
+    return true;
+  }, []);
+
+  // Un marcador ajustable conserva las coordenadas elegidas, no el centro de la colonia.
+  useEffect(() => {
+    const m = mapa.current;
+    if (!m || !listo || !ubicacion) return;
+    const marker = new Marker({ color: "#0f766e", draggable: true }).setLngLat(ubicacion).addTo(m);
+    ubicacionMarker.current = marker;
+    const elemento = marker.getElement();
+    elemento.setAttribute("aria-label", "Punto de referencia. Arrastra o usa las flechas para ajustarlo.");
+    elemento.setAttribute("title", "Arrastra para corregir tu ubicación");
+    elemento.tabIndex = 0;
+    const mover = (punto: Coordenadas) => {
+      solicitudUbicacion.current++;
+      setUbicando(false);
+      if (!fijarPunto(punto)) { marker.setLngLat(ubicacion); return; }
+      setAjustandoUbicacion(false);
+      setVista("asesor");
+      setPanelAbierto(true);
+    };
+    marker.on("dragend", () => { const punto = marker.getLngLat(); mover([punto.lng, punto.lat]); });
+    const teclado = (event: KeyboardEvent) => {
+      const pasos: Record<string, Coordenadas> = { ArrowLeft: [-0.0001, 0], ArrowRight: [0.0001, 0], ArrowUp: [0, 0.0001], ArrowDown: [0, -0.0001] };
+      const paso = pasos[event.key];
+      if (!paso) return;
+      event.preventDefault();
+      event.stopPropagation();
+      mover([ubicacion[0] + paso[0], ubicacion[1] + paso[1]]);
+      // El siguiente marcador se crea al actualizar el estado.
+      requestAnimationFrame(() => ubicacionMarker.current?.getElement().focus());
+    };
+    elemento.addEventListener("keydown", teclado);
+    return () => { elemento.removeEventListener("keydown", teclado); marker.remove(); ubicacionMarker.current = null; };
+  }, [ubicacion, listo, fijarPunto]);
+
+  useEffect(() => {
+    const m = mapa.current;
+    if (!m || !listo || !ajustandoUbicacion) return;
+    const elegir = (event: { lngLat: { lng: number; lat: number } }) => {
+      if (!fijarPunto([event.lngLat.lng, event.lngLat.lat])) return;
+      setAjustandoUbicacion(false);
+      setVista("asesor");
+      setPanelAbierto(true);
+    };
+    m.on("click", elegir);
+    return () => { m.off("click", elegir); };
+  }, [ajustandoUbicacion, listo, fijarPunto]);
+
+  function ajustarUbicacion() {
+    solicitudUbicacion.current++;
+    setUbicando(false);
+    setAjustandoUbicacion(true);
+    setPanelAbierto(false);
+    setErrorUbicacion(null);
+  }
+
+  function localizar() {
+    setErrorUbicacion(null);
+    setAjustandoUbicacion(false);
+    if (!navigator.geolocation) { setErrorUbicacion("Tu navegador no permite obtener la ubicación. Elige un punto en el mapa."); return; }
+    const solicitud = ++solicitudUbicacion.current;
+    setUbicando(true);
+    navigator.geolocation.getCurrentPosition((pos) => {
+      if (solicitud !== solicitudUbicacion.current) return;
+      const punto: Coordenadas = [pos.coords.longitude, pos.coords.latitude];
+      setUbicando(false);
+      if (!fijarPunto(punto, pos.coords.accuracy)) return;
+      if (pos.coords.accuracy > 100) setErrorUbicacion(`La ubicación tiene una precisión aproximada de ±${Math.ceil(pos.coords.accuracy)} m. Puedes corregirla con «Elegir punto» o arrastrando el marcador.`);
+      const movil = window.innerWidth < 1024;
+      mapa.current?.flyTo({ center: punto, zoom: pos.coords.accuracy <= 100 ? 15 : 13,
+        offset: movil ? [0, 0] : [175, 0],
+        duration: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? 0 : 700,
+      });
+    }, (err) => {
+      if (solicitud !== solicitudUbicacion.current) return;
+      setUbicando(false);
+      setErrorUbicacion(err.code === 1 ? "No se autorizó la ubicación. Puedes elegir un punto en el mapa." : "No pudimos obtener una ubicación nueva. Intenta otra vez o elige un punto en el mapa.");
+    }, { timeout: 20000, maximumAge: 0, enableHighAccuracy: true });
+  }
+
+  function abrirAsesor(nuevoObjetivo: Objetivo) {
+    setObjetivo(nuevoObjetivo);
+    setPerfilActivo(nuevoObjetivo === "estacionamiento" ? "vehicular" : nuevoObjetivo === "renta" ? "residencial" : "peaton");
+    setVista("asesor");
+    setPanelAbierto(true);
+  }
 
   // --- datos de la colonia seleccionada ---------------------------------
   const detalle = useMemo(() => {
@@ -368,42 +553,54 @@ export default function MapaRiesgo({ meta }: Props) {
   }, [seleccion, perfil, municipios]);
 
   return (
-    <div className="relative h-full w-full">
-      {/*
-        La altura se da con h-full y NO con `absolute inset-0`.
-        Razón: MapLibre le agrega a este div la clase `maplibregl-map`, cuya
-        hoja de estilos declara `position: relative`. Esa regla vence al
-        utilitario `absolute` de Tailwind, el div se queda sin caja, y
-        MapLibre acaba dibujando un lienzo de 300 px de alto sobre un
-        contenedor de altura cero: el mapa no aparece y nada falla de forma
-        visible. Con `h-full` la altura no depende del posicionamiento.
-      */}
-      <div ref={contenedor} className="h-full w-full" />
-
-      {/* Panel de control */}
-      <button
-        onClick={() => setPanelAbierto((v) => !v)}
-        className="absolute left-3 top-3 z-20 rounded-md bg-white px-3 py-2 text-sm font-medium shadow-md ring-1 ring-black/10 md:hidden"
-        aria-expanded={panelAbierto}
-      >
-        {panelAbierto ? "Cerrar" : "Capas y leyenda"}
-      </button>
-
-      <aside
-        className={`absolute z-10 flex flex-col gap-4 overflow-y-auto bg-white/95 p-4 shadow-xl ring-1 ring-black/10 backdrop-blur
-          ${panelAbierto ? "inset-x-3 bottom-3 top-16 rounded-lg" : "hidden"}
-          md:left-3 md:top-3 md:bottom-3 md:right-auto md:block md:w-80 md:rounded-lg`}
-      >
+    <div className="map-app">
+      <header className="app-header">
+        <div className="brand"><span className="brand-mark"><Logo className="brand-logo" /></span><div><h1>Safe<span>Spots</span></h1><p>Conoce la zona. Planea tu estancia.</p></div></div>
+        <div className="search-container">
+          <label htmlFor="buscar-colonia" className="sr-only">Buscar colonia o municipio</label>
+          <span className="search-icon" aria-hidden>⌕</span>
+          <input id="buscar-colonia" type="search" autoComplete="off" placeholder={listo ? "Buscar colonia o municipio…" : "Cargando colonias…"} disabled={!listo} value={busqueda} onChange={(e) => setBusqueda(e.target.value)} onKeyDown={(e) => { if (e.key === "Escape") setBusqueda(""); }} aria-controls={busqueda.length >= 2 ? "resultados-colonias" : undefined} />
+          {busqueda.trim().length >= 2 && <div id="resultados-colonias" className="search-results" aria-label="Resultados de colonias">
+            {resultados.map(({ colonia }) => <button key={colonia.properties.clave} onClick={() => verColonia(colonia.properties.clave, true)}><strong>{colonia.properties.nombre}</strong><span>{municipios.get(colonia.properties.municipio_clave)}</span></button>)}
+            {resultados.length === 0 && <p role="status">No encontramos esa colonia. Prueba otro nombre.</p>}
+          </div>}
+        </div>
+        <div className="header-coverage"><span className="status-dot" />{numero(meta.unidad_analisis.total)} colonias<span className="block pl-3 text-[11px] text-slate-400">Guadalajara y su zona metropolitana</span></div>
+      </header>
+      <div className="history-strip"><span aria-hidden>◷</span> Historial {meta.periodo.inicio.slice(0, 4)}–{meta.periodo.fin.slice(0, 4)} · No representa la seguridad actual.</div>
+      <div className={`map-stage ${ajustandoUbicacion ? "choosing-location" : ""}`}>
+      <div ref={contenedor} className="h-full w-full" aria-label="Mapa de incidencia histórica por colonia" />
+      <div className="map-quick-actions">
+        <button onClick={() => abrirAsesor("estacionamiento")} aria-pressed={perfilActivo === "vehicular"}>Dejar mi auto</button>
+        <button onClick={() => abrirAsesor("turismo")}>Dónde alojarme ↗</button>
+        <button onClick={localizar} disabled={ubicando}>{ubicando ? "Ubicando…" : "Mi ubicación ◎"}</button>
+        <button onClick={ajustarUbicacion} aria-pressed={ajustandoUbicacion}>Elegir punto ⌖</button>
+      </div>
+      {ajustandoUbicacion && <div className="choose-location-notice" role="status"><p>Toca el mapa en tu ubicación o destino. También puedes arrastrar el marcador.</p><button onClick={() => { setAjustandoUbicacion(false); setPanelAbierto(true); }}>Cancelar</button></div>}
+      <div className={`map-legend ${panelAbierto ? "panel-visible" : ""}`} aria-label="Leyenda del riesgo histórico">
+        <strong>{perfil.clave === "vehicular" ? "Auto · historial vehicular" : perfil.nombre + " · historial"}</strong>
+        <div>{ORDEN_ESTRATOS.map((e) => <span key={e}><i style={{ backgroundColor: COLOR_ESTRATO[e] }} />{ETIQUETA_ESTRATO[e]}</span>)}</div>
+        <small>Translúcido: muestra insuficiente · gris: sin clasificación</small>
+      </div>
+      <aside id="panel-mapa" aria-label={vista === "asesor" ? "Asistente de colonias" : "Perfiles y leyenda"} className={`control-panel ${panelAbierto ? "is-open" : ""}`}>
+        <div className="panel-tabs">
+          <button aria-pressed={vista === "explorar"} onClick={() => setVista("explorar")}>Explorar mapa</button>
+          <button aria-pressed={vista === "asesor"} onClick={() => setVista("asesor")}>Asistente IA <span>✦</span></button>
+        </div>
+        <div className="panel-content">
+        <div hidden={vista !== "asesor"}>
+          <AsesorColonia objetivo={objetivo} onObjetivo={abrirAsesor} referencia={referencia ? { clave: referencia.clave, nombre: `${referencia.nombre}, ${municipios.get(referencia.municipio_clave) ?? ""}` } : null} ubicacion={ubicacion} precisionUbicacion={precisionUbicacion} onUbicacion={localizar} onAjustarUbicacion={ajustarUbicacion} ubicando={ubicando} onVerColonia={verColonia} />
+        </div>
+        <div hidden={vista !== "explorar"} className="explore-content">
         <header>
-          <h1 className="text-base font-semibold leading-tight text-stone-900">
-            Riesgo delictivo por colonia
-          </h1>
-          <p className="mt-0.5 text-xs text-stone-500">
-            Zona Metropolitana de Guadalajara · {numero(meta.unidad_analisis.total)}{" "}
-            colonias
-          </p>
+          <div className="section-eyebrow">EXPLORA CON CONTEXTO</div>
+          <h2 className="text-xl font-semibold tracking-tight text-slate-900">Cada colonia, una historia</h2>
+          <p className="mt-1 text-sm leading-relaxed text-slate-500">Elige qué quieres consultar y toca una zona para conocer sus datos.</p>
         </header>
-
+        <div className="intent-grid">
+          <button onClick={() => abrirAsesor("turismo")}><span aria-hidden>⌂</span>De turismo<span className="intent-caption">Dónde alojarte</span></button>
+          <button onClick={() => abrirAsesor("renta")}><span aria-hidden>⌑</span>Buscar renta<span className="intent-caption">Tu próxima colonia</span></button>
+        </div>
         {/* La limitación más importante del proyecto, no escondida en una nota
             al pie: los datos terminan en febrero de 2021. */}
         <div className="rounded-md border border-amber-300 bg-amber-50 p-2.5">
@@ -417,18 +614,19 @@ export default function MapaRiesgo({ meta }: Props) {
           <h2 className="mb-2 text-xs font-semibold uppercase tracking-wide text-stone-500">
             Perfil de riesgo
           </h2>
-          <div className="flex flex-col gap-1">
+          <div className="profile-options">
             {meta.perfiles.map((p) => (
               <button
                 key={p.clave}
                 onClick={() => setPerfilActivo(p.clave)}
+                aria-pressed={p.clave === perfilActivo}
                 className={`rounded-md px-2.5 py-2 text-left text-sm transition-colors ${
                   p.clave === perfilActivo
                     ? "bg-stone-900 text-white"
                     : "text-stone-700 hover:bg-stone-100"
                 }`}
               >
-                <span className="font-medium">{p.nombre}</span>
+                <span className="font-medium">{p.clave === "vehicular" ? "Auto y estacionamiento" : p.nombre}</span>
                 <span
                   className={`block text-xs ${
                     p.clave === perfilActivo ? "text-stone-300" : "text-stone-500"
@@ -473,9 +671,11 @@ export default function MapaRiesgo({ meta }: Props) {
           </ul>
         </section>
 
+        <label className="flex min-h-11 items-center gap-2 text-sm text-slate-700"><input type="checkbox" checked={nombres} onChange={(e) => setNombres(e.target.checked)} className="h-4 w-4 accent-teal-700" /> Nombres de colonias al acercar</label>
         <section className="mt-auto border-t border-stone-200 pt-3">
           <button
             onClick={() => setMetodologiaAbierta((v) => !v)}
+            aria-expanded={metodologiaAbierta}
             className="flex w-full items-center justify-between text-xs font-semibold uppercase tracking-wide text-stone-500 hover:text-stone-800"
           >
             Metodología y fuentes
@@ -523,11 +723,13 @@ export default function MapaRiesgo({ meta }: Props) {
             </div>
           )}
         </section>
+        </div>
+        </div>
       </aside>
 
       {/* Ficha de la colonia seleccionada */}
       {detalle && (
-        <div className="absolute bottom-3 left-3 right-3 z-20 rounded-lg bg-white/95 p-4 shadow-xl ring-1 ring-black/10 backdrop-blur md:left-auto md:right-3 md:w-80">
+        <section aria-label="Detalle de la colonia" className={`colony-detail ${panelAbierto ? "mobile-hidden" : ""}`}>
           <div className="flex items-start justify-between gap-2">
             <div>
               <h3 className="text-sm font-semibold leading-tight text-stone-900">
@@ -537,7 +739,7 @@ export default function MapaRiesgo({ meta }: Props) {
             </div>
             <button
               onClick={() => setSeleccion(null)}
-              className="-mr-1 -mt-1 rounded p-1 text-stone-400 hover:bg-stone-100 hover:text-stone-700"
+              className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg text-stone-500 hover:bg-stone-100"
               aria-label="Cerrar ficha"
             >
               ✕
@@ -548,9 +750,9 @@ export default function MapaRiesgo({ meta }: Props) {
             <div className="mt-2.5 flex items-center gap-2">
               <span
                 className="rounded px-2 py-0.5 text-xs font-semibold"
-                style={{ backgroundColor: COLOR_ESTRATO[detalle.estrato] }}
+                style={{ backgroundColor: COLOR_ESTRATO[detalle.estrato], color: TEXTO_SOBRE_ESTRATO[detalle.estrato] }}
               >
-                Riesgo {ETIQUETA_ESTRATO[detalle.estrato].toLowerCase()}
+                Histórico: {ETIQUETA_ESTRATO[detalle.estrato].toLowerCase()}
               </span>
               <span className="text-xs text-stone-500">
                 índice {decimal(detalle.indice)} / 100
@@ -560,7 +762,7 @@ export default function MapaRiesgo({ meta }: Props) {
 
           <dl className="mt-3 grid grid-cols-2 gap-x-3 gap-y-2 text-xs">
             <div>
-              <dt className="text-stone-500">Incidentes</dt>
+              <dt className="text-stone-500">Incidentes históricos</dt>
               <dd className="font-medium tabular-nums text-stone-900">
                 {numero(detalle.incidentes)}
               </dd>
@@ -585,6 +787,11 @@ export default function MapaRiesgo({ meta }: Props) {
             </div>
           </dl>
 
+          {perfilActivo === "vehicular" && <div className="mt-3 rounded-xl bg-slate-50 p-3 text-xs leading-relaxed text-slate-700">
+            <strong className="block text-slate-900">Antes de dejar tu auto</strong>
+            {detalle.muestraBaja || !detalle.estrato ? "La información es insuficiente para valorar esta colonia." : detalle.estrato === "alto" || detalle.estrato === "critico" ? "Esta colonia registró incidencia vehicular elevada. Prioriza un estacionamiento con acceso controlado y verifica sus condiciones actuales." : "Una incidencia histórica menor no garantiza que sea seguro estacionarse en la calle. Verifica iluminación, vigilancia y acceso controlado."}
+            <p className="mt-1">Incluye robos de vehículos, autopartes y objetos del interior; también otros hechos del perfil vehicular.</p>
+          </div>}
           {detalle.percentil !== null && (
             <p className="mt-2.5 text-xs text-stone-600">
               Más incidencia que el {decimal(detalle.percentil)}% de las colonias
@@ -599,8 +806,18 @@ export default function MapaRiesgo({ meta }: Props) {
               población, la cifra de esta colonia no es concluyente por sí sola.
             </p>
           )}
-        </div>
+          <button onClick={() => { if (seleccion) { setReferencia(seleccion); setUbicacion(null); } abrirAsesor(perfilActivo === "vehicular" ? "estacionamiento" : "turismo"); }} className="primary-button mt-3 w-full">{perfilActivo === "vehicular" ? "Consultar dónde dejar mi auto" : "Buscar alojamiento cerca"} ↗</button>
+          <p className="mt-2 text-[10px] text-slate-500">Periodo: {meta.periodo.etiqueta}. No garantiza seguridad actual.</p>
+        </section>
       )}
+
+      <nav className="mobile-nav" aria-label="Navegación del mapa">
+        <button aria-pressed={!panelAbierto} onClick={() => setPanelAbierto(false)}>◎<span>Mapa</span></button>
+        <button aria-expanded={panelAbierto && vista === "explorar"} aria-controls="panel-mapa" onClick={() => { setVista("explorar"); setPanelAbierto(true); }}>☷<span>Perfiles</span></button>
+        <button aria-expanded={panelAbierto && vista === "asesor"} aria-controls="panel-mapa" onClick={() => { setVista("asesor"); setPanelAbierto(true); }}>✦<span>Asistente</span></button>
+      </nav>
+      {errorUbicacion && <div role="alert" className="location-error"><p>{errorUbicacion}</p><button onClick={() => setErrorUbicacion(null)} aria-label="Cerrar aviso de ubicación">✕</button></div>}
+      {!seleccion && !panelAbierto && listo && <div className="map-hint">Toca una colonia para explorar su historial</div>}
 
       {/* Estados de carga y error */}
       {!listo && !error && (
@@ -625,6 +842,7 @@ export default function MapaRiesgo({ meta }: Props) {
           </p>
         </div>
       )}
+      </div>
     </div>
   );
 }

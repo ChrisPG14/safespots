@@ -11,6 +11,7 @@ const eslintConfig = defineConfig([
     ".next/**",
     "out/**",
     "build/**",
+    ".test-output/**",
     "next-env.d.ts",
     // Código de terceros: el worker de MapLibre viene minificado y lo copia
     // scripts/copiar-worker-maplibre.mjs desde node_modules. Sin esta
