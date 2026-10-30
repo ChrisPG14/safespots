@@ -1,16 +1,21 @@
-# Póster de la Exposición Final · Proyecto Modular ICOM 2026B
+# Cartel de la Exposición Final, Proyecto Modular ICOM 2026B
 
-- `poster.pdf`: archivo final para imprimir en lona y subir a la plataforma
-  (60 cm × 160 cm, vertical).
-- `poster.html`: fuente editable del póster.
-- `figuras/mapa-riesgo.svg`: mapa vectorial, generado del mismo GeoJSON que
-  sirve la aplicación (`python3 generar_mapa.py`).
-- `figuras/captura-app.jpg`: captura de la aplicación a 4320 × 2700 px.
+- `SafeSpots_Cartel.pdf`: archivo para imprimir en lona y subir a la plataforma (60 cm x 160 cm, vertical).
+- `SafeSpots_Cartel.html`: versión editable en un solo archivo.
+- `poster.html` y `figuras/`: fuente del cartel.
 
-Para regenerar el PDF después de editar el HTML (requiere Playwright):
+## Cómo editar
+
+1. Abrir `SafeSpots_Cartel.html` en Google Chrome.
+2. Hacer clic sobre cualquier texto para cambiarlo, o sobre una imagen para reemplazarla.
+3. "Guardar cambios" descarga una copia del archivo con las modificaciones.
+4. "Exportar PDF" abre el diálogo de impresión: elegir "Guardar como PDF", márgenes "Ninguno" y activar "Gráficos de fondo". El tamaño de 60 x 160 cm ya viene configurado.
+
+La barra superior indica si el contenido sigue cabiendo en el tamaño oficial.
+
+## Regenerar desde la fuente
 
 ```bash
+python3 generar_mapa.py
 node exportar.js
 ```
-
-El script avisa si el contenido se sale del alto oficial.
