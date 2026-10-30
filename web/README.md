@@ -30,7 +30,7 @@ en el `.env` **de la raíz del proyecto** (no en `web/`):
 
 ```dotenv
 GEMINI_API_KEY=tu_clave
-GEMINI_MODEL=gemini-2.5-flash
+GEMINI_MODEL=gemini-3.6-flash
 ```
 
 **No hace falta reiniciar el servidor:** `configuracionGemini()` relee el archivo
@@ -64,7 +64,13 @@ Las coordenadas del dispositivo **no se envían al proveedor**: se usan solo en
 nuestro servidor para calcular distancias.
 
 Usa [salida estructurada](https://ai.google.dev/gemini-api/docs/generate-content/structured-output).
-Hay timeout de 35 s, manejo de cuota y de respuesta incompleta, y un tope de 20
+Hay un plazo total de 60 s, con hasta tres intentos ante fallos de red o
+HTTP 500/502/503/504, esperas de 0.5 y 1 s y respeto de `Retry-After`. No se
+reintentan cuotas, claves rechazadas, modelos inexistentes ni respuestas
+incompletas. El servidor registra solo modelo, código HTTP e intentos; nunca
+claves, coordenadas ni preferencias. El cliente espera hasta 75 s; con
+`gemini-3.6-flash` se usa razonamiento `low` para reducir latencia, según la
+[configuración de pensamiento de Gemini](https://ai.google.dev/gemini-api/docs/generate-content/thinking). Hay manejo de cuota y de respuesta incompleta, y un tope de 20
 consultas por minuto con 3 concurrentes **por proceso**. Un despliegue con varias
 instancias necesita además cuota compartida o autenticación.
 
@@ -79,7 +85,7 @@ culposo además de los robos relacionados con vehículos.
 ## Verificación
 
 ```bash
-npm test         # 9 pruebas, Gemini simulado, sin gastar cuota
+npm test         # pruebas con Gemini simulado, sin gastar cuota
 npm run lint
 npm run build
 ```
