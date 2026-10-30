@@ -23,7 +23,7 @@ fs.writeFileSync(path.join(dir, 'SafeSpots_Cartel.html'), editable);
   await pagina.emulateMedia({ media: 'print' });
   await pagina.goto('file://' + path.join(dir, 'SafeSpots_Cartel.html'), { waitUntil: 'networkidle' });
   const holgura = await pagina.evaluate(() =>
-    (document.querySelector('.fecha').getBoundingClientRect().top -
+    (document.querySelector('footer').getBoundingClientRect().top -
      document.querySelector('.cuerpo').getBoundingClientRect().bottom) / 3.7795);
   console.log(holgura < 0 ? `NO CABE: sobran ${(-holgura).toFixed(0)} mm` : `Cabe, holgura ${holgura.toFixed(0)} mm`);
   await pagina.pdf({ path: path.join(dir, 'SafeSpots_Cartel.pdf'), width: '600mm', height: '1600mm', printBackground: true, pageRanges: '1' });
