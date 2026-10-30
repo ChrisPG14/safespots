@@ -1,0 +1,396 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>SafeSpots · Póster</title>
+<!--
+  Póster de la Exposición Final de Proyectos Modulares ICOM 2026B.
+  Tamaño oficial: 60 cm de ancho × 160 cm de alto, vertical, impreso en lona.
+  Tipografía Arial/Helvetica, cuerpo ≥ 18 pt y títulos ≥ 24 pt (aquí se usa
+  bastante más porque el póster se lee de pie, a uno o dos metros).
+  Se exporta a PDF con `node exportar.js`.
+-->
+<style>
+  @page { size: 600mm 1600mm; margin: 0; }
+  :root {
+    --marca: #0f766e;
+    --marca-oscura: #0b4f4a;
+    --marca-clara: #e6f4f2;
+    --texto: #1c2430;
+    --tenue: #4b5563;
+    --linea: #cfd8dc;
+    --bajo: #ffffb2; --moderado: #fecc5c; --alto: #fd8d3c; --critico: #e31a1c;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { background: #fff; }
+  body {
+    position: relative; width: 600mm; height: 1600mm; overflow: hidden;
+    font-family: Arial, Helvetica, "Liberation Sans", sans-serif;
+    font-size: 22pt; line-height: 1.28; color: var(--texto);
+    -webkit-print-color-adjust: exact; print-color-adjust: exact;
+  }
+  b, strong { font-weight: 700; }
+
+  /* ---------- Cabecera ---------- */
+  header {
+    background: var(--marca); color: #fff;
+    padding: 22mm 28mm 14mm;
+  }
+  .institucion {
+    display: flex; justify-content: space-between; align-items: baseline;
+    font-size: 22pt; letter-spacing: .02em; opacity: .92;
+    border-bottom: 1.2mm solid rgba(255,255,255,.35); padding-bottom: 5mm; margin-bottom: 9mm;
+  }
+  .marca { display: flex; align-items: center; gap: 10mm; }
+  .marca svg { width: 50mm; height: 50mm; flex: none; }
+  .marca h1 { font-size: 124pt; line-height: .9; letter-spacing: -.02em; }
+  .marca h1 span { font-weight: 400; opacity: .8; }
+  .subtitulo { font-size: 42pt; line-height: 1.12; font-weight: 700; margin-top: 7mm; }
+  .autoria { margin-left: auto; text-align: right; font-size: 25pt; line-height: 1.3; }
+  .autoria .rol { opacity: .8; }
+
+  /* ---------- Cifras clave ---------- */
+  .cifras {
+    display: grid; grid-template-columns: repeat(4, 1fr);
+    background: var(--marca-oscura); color: #fff;
+  }
+  .cifras div { padding: 7mm 4mm 8mm; text-align: center; border-right: .6mm solid rgba(255,255,255,.2); }
+  .cifras div:last-child { border-right: 0; }
+  .cifras b { display: block; font-size: 52pt; line-height: 1; }
+  .cifras span { display: block; font-size: 20pt; line-height: 1.2; margin-top: 3mm; opacity: .9; }
+
+  /* ---------- Cuerpo ---------- */
+  main { padding: 11mm 28mm 0; }
+  section { margin-bottom: 7mm; }
+  h2 {
+    font-size: 38pt; line-height: 1.05; color: var(--marca);
+    display: flex; align-items: center; gap: 5mm;
+    border-bottom: .9mm solid var(--marca); padding-bottom: 2mm; margin-bottom: 4mm;
+  }
+  h2 .n {
+    display: inline-grid; place-items: center; flex: none;
+    width: 14mm; height: 14mm; border-radius: 50%;
+    background: var(--marca); color: #fff; font-size: 27pt;
+  }
+  h3 { font-size: 28pt; color: var(--marca-oscura); margin: 4mm 0 2mm; }
+  p + p { margin-top: 3mm; }
+  ul, ol { padding-left: 11mm; }
+  li { margin-top: 1.6mm; }
+  .dos { display: grid; grid-template-columns: 1fr 1fr; gap: 12mm; }
+  .dos > section { margin-bottom: 0; }
+  .fila { margin-bottom: 7mm; }
+
+  .hipotesis {
+    background: var(--marca-clara); border-left: 3mm solid var(--marca);
+    padding: 5mm 7mm; margin-top: 4mm;
+  }
+  .nota {
+    background: #fff8e1; border-left: 3mm solid #f2a900;
+    padding: 3mm 5mm; margin-top: 3mm; font-size: 21pt;
+  }
+
+  /* Pasos de la metodología */
+  .pasos { list-style: none; padding: 0; counter-reset: paso; display: grid; grid-template-columns: 1fr 1fr; gap: 4mm 9mm; }
+  .pasos li { counter-increment: paso; position: relative; padding-left: 15mm; margin: 0; }
+  .pasos li::before {
+    content: counter(paso); position: absolute; left: 0; top: .5mm;
+    width: 11mm; height: 11mm; border-radius: 2mm; background: var(--marca-oscura); color: #fff;
+    font-weight: 700; font-size: 24pt; display: grid; place-items: center;
+  }
+
+  /* Tablas */
+  table { width: 100%; border-collapse: collapse; font-size: 21pt; line-height: 1.22; }
+  th { background: var(--marca); color: #fff; text-align: left; padding: 2.2mm 3mm; }
+  td { padding: 2mm 3mm; border-bottom: .4mm solid var(--linea); vertical-align: top; }
+  tr:nth-child(even) td { background: #f5f8f8; }
+  td.num, th.num { text-align: right; white-space: nowrap; }
+  .ok { color: #0b6b3a; font-weight: 700; }
+
+  /* Figuras */
+  figure { margin: 0; }
+  figcaption { font-size: 20pt; line-height: 1.25; color: var(--tenue); margin-top: 3mm; }
+  figcaption b { color: var(--texto); }
+  .fig-mapa { display: grid; grid-template-columns: 200mm 1fr; gap: 9mm; align-items: start; }
+  .fig-mapa img { width: 100%; display: block; }
+  .leyenda { list-style: none; padding: 0; font-size: 21pt; display: grid; grid-template-columns: 1fr 1fr; gap: 0 4mm; margin-top: 4mm; }
+  .leyenda li { display: flex; align-items: center; gap: 4mm; margin: 0 0 3mm; }
+  .leyenda i { width: 11mm; height: 11mm; border: .4mm solid #777; flex: none; }
+  .captura img { width: 100%; display: block; border: .6mm solid var(--linea); border-radius: 3mm; }
+  svg text { font-family: Arial, Helvetica, "Liberation Sans", sans-serif; }
+
+  /* Bibliografía */
+  .biblio { font-size: 19pt; line-height: 1.22; padding-left: 12mm; columns: 2; column-gap: 14mm; }
+  .biblio li { break-inside: avoid; }
+  .biblio li { margin-top: 1.2mm; }
+
+  footer {
+    position: absolute; left: 0; right: 0; bottom: 0; height: 26mm;
+    background: var(--marca); color: #fff; font-size: 22pt;
+    display: flex; align-items: center; justify-content: space-between; padding: 0 28mm;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="institucion">
+    <span>Universidad de Guadalajara · CUCEI · Depto. de Ciencias Computacionales</span>
+    <span>Proyecto Modular ICOM · 2026B</span>
+  </div>
+  <div class="marca">
+    <svg viewBox="0 0 32 32" aria-hidden="true">
+      <rect width="32" height="32" rx="9" fill="#ffffff"/>
+      <path fill="#0f766e" fill-rule="evenodd" d="M16 6.2 23.4 9v6c0 4.7-3 8.9-7.4 10.5C11.6 23.9 8.6 19.7 8.6 15V9ZM16 12.6a2.7 2.7 0 1 0 0 5.4 2.7 2.7 0 1 0 0-5.4Z"/>
+    </svg>
+    <h1>Safe<span>Spots</span></h1>
+    <div class="autoria">
+      <b>Christian Moisés de Alba Velarde</b><br><span class="rol">Alumno · christian.dealba2467@alumnos.udg.mx</span><br>
+      <b>ASESOR_NOMBRE</b><br><span class="rol">Asesor</span>
+    </div>
+  </div>
+  <div class="subtitulo">Sistema de Evaluación de Riesgo Delictivo por Colonia en la Zona Metropolitana de Guadalajara</div>
+</header>
+
+<div class="cifras">
+  <div><b>346,384</b><span>incidentes oficiales procesados</span></div>
+  <div><b>2,068</b><span>colonias en 6 municipios</span></div>
+  <div><b>84.4%</b><span>de incidentes ubicados (meta: 80%)</span></div>
+  <div><b>186×</b><span>más rápido con índice espacial GiST</span></div>
+</div>
+
+<main>
+
+  <!-- 1 + 2 -->
+  <div class="dos fila">
+    <section>
+      <h2><span class="n">1</span>Introducción</h2>
+      <p>El INEGI y el IIEG publican incidencia delictiva en tablas que no responden preguntas concretas: <b>dónde alojarse, dónde rentar o dónde dejar el auto</b>.</p>
+      <p>SafeSpots convierte esa incidencia en un <b>índice de riesgo comparable por colonia</b>, por perfil de uso, y lo entrega en un mapa interactivo y en recomendaciones de un asistente acotado a los datos del sistema.</p>
+      <h3>Objetivos</h3>
+      <ol>
+        <li>Pipeline reproducible con huella SHA-256 por archivo.</li>
+        <li>Empatar la incidencia con los polígonos oficiales con cobertura &gt; 80%.</li>
+        <li>Índice de riesgo para cinco perfiles de usuario.</li>
+        <li>Publicarlo en una aplicación web cartográfica.</li>
+        <li>Medir el efecto de la indexación espacial.</li>
+      </ol>
+    </section>
+    <section>
+      <h2><span class="n">2</span>Problema e hipótesis</h2>
+      <p><b>Problema.</b> En la ZMG no existe un indicador de riesgo delictivo comparable por colonia. Los mapas habituales dividen todo entre población residente, por lo que el Centro de Guadalajara —2,585 habitantes y cientos de miles de visitantes— aparece como la zona más peligrosa imaginable.</p>
+      <div class="hipotesis"><b>Hipótesis.</b> Si la incidencia oficial se normaliza con el denominador propio de cada perfil (población o km²) y se suaviza con contracción bayesiana, se obtiene un índice por colonia comparable, trazable a su fuente y útil para decisiones turísticas e inmobiliarias, ubicando más del 80% de los incidentes.</div>
+      <div class="nota"><b>Restricción real:</b> no existe una fuente pública de delitos geolocalizados. La única serie por colonia (IIEG) termina en feb. 2021 y no registra la hora; el sistema lo declara en su interfaz.</div>
+    </section>
+  </div>
+
+  <!-- 3 -->
+  <section>
+    <h2><span class="n">3</span>Metodología</h2>
+    <ol class="pasos">
+      <li><b>Verificación de fuentes</b>, una por una: IIEG (incidencia y colonias), INEGI (Marco Geoestadístico 2025, Censo 2020) y SESNSP.</li>
+      <li><b>ETL reproducible</b>: descarga con huella SHA-256, reparación de geometrías y taxonomía canónica de delitos.</li>
+      <li><b>Empate de nombres</b> en 4 pasos de confiabilidad decreciente: exacto, alias del padrón, tokens ordenados y difuso acotado al municipio.</li>
+      <li><b>Índice de riesgo</b>: ponderación por severidad, tasa por perfil, contracción bayesiana empírica (Clayton y Kaldor), escala logarítmica 0–100.</li>
+      <li><b>Estratificación</b> en bajo, moderado, alto y crítico; intervalos de Poisson (Byar) para marcar muestras insuficientes.</li>
+      <li><b>Validación</b>: suite de pruebas automatizadas y benchmark reproducible de consultas espaciales.</li>
+    </ol>
+  </section>
+
+  <!-- 4 -->
+  <section>
+    <h2><span class="n">4</span>Desarrollo y tecnología</h2>
+    <figure>
+      <svg viewBox="0 2 540 152" width="100%">
+        <defs>
+          <marker id="f" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="5" markerHeight="5" orient="auto"><path d="M0 0 10 5 0 10Z" fill="#0b4f4a"/></marker>
+        </defs>
+        <g font-size="8.2" fill="#1c2430">
+          <!-- Fuentes -->
+          <rect x="2" y="18" width="110" height="134" rx="5" fill="#f5f8f8" stroke="#cfd8dc"/>
+          <text x="57" y="12" text-anchor="middle" font-weight="700" fill="#0f766e" font-size="9">Fuentes oficiales</text>
+          <text x="10" y="42">IIEG · incidencia (CSV)</text>
+          <text x="10" y="70">IIEG · colonias (SHP)</text>
+          <text x="10" y="98">INEGI · Marco Geo. 2025</text>
+          <text x="10" y="126">INEGI · Censo 2020</text>
+          <!-- ETL -->
+          <rect x="140" y="18" width="120" height="134" rx="5" fill="#0f766e"/>
+          <text x="200" y="12" text-anchor="middle" font-weight="700" fill="#0f766e" font-size="9">ETL · Python 3.14</text>
+          <g fill="#fff" text-anchor="middle">
+            <text x="200" y="46">GeoPandas · pandas</text>
+            <text x="200" y="62">RapidFuzz · scikit-learn</text>
+            <text x="200" y="92" font-weight="700">empate de nombres</text>
+            <text x="200" y="108" font-weight="700">índice de riesgo</text>
+            <text x="200" y="138">huella SHA-256</text>
+          </g>
+          <!-- Publicación -->
+          <rect x="288" y="18" width="110" height="58" rx="5" fill="#e6f4f2" stroke="#0f766e"/>
+          <text x="343" y="40" text-anchor="middle" font-weight="700">PostgreSQL 17</text>
+          <text x="343" y="54" text-anchor="middle">+ PostGIS 3.5 (GiST)</text>
+          <text x="343" y="68" text-anchor="middle" fill="#4b5563" font-size="7">registro y análisis</text>
+          <rect x="288" y="94" width="110" height="58" rx="5" fill="#e6f4f2" stroke="#0f766e"/>
+          <text x="343" y="116" text-anchor="middle" font-weight="700">GeoJSON + meta</text>
+          <text x="343" y="130" text-anchor="middle">2.8 MB en CDN</text>
+          <text x="343" y="144" text-anchor="middle" fill="#4b5563" font-size="7">capa estática</text>
+          <!-- Web -->
+          <rect x="426" y="18" width="112" height="58" rx="5" fill="#0b4f4a"/>
+          <g fill="#fff" text-anchor="middle">
+            <text x="482" y="40" font-weight="700">Next.js 16 · React 19</text>
+            <text x="482" y="54">MapLibre GL</text>
+            <text x="482" y="68" font-size="7">Vercel</text>
+          </g>
+          <rect x="426" y="94" width="112" height="58" rx="5" fill="#0b4f4a"/>
+          <g fill="#fff" text-anchor="middle">
+            <text x="482" y="116" font-weight="700">/api/asesor</text>
+            <text x="482" y="130">Gemini · salida</text>
+            <text x="482" y="144">estructurada + Zod</text>
+          </g>
+          <g stroke="#0b4f4a" stroke-width="1.6" fill="none" marker-end="url(#f)">
+            <path d="M112 85H138"/>
+            <path d="M260 70H286"/><path d="M260 115H286"/>
+            <path d="M398 123H424"/><path d="M398 47H424" stroke-dasharray="3 2"/>
+            <path d="M482 76V92"/>
+          </g>
+        </g>
+      </svg>
+      <figcaption><b>Fig. 1.</b> Arquitectura. PostGIS es el sistema de registro; la web sirve la capa de riesgo como archivo estático desde el CDN, sin arranque en frío de la base.</figcaption>
+    </figure>
+    <div class="dos" style="margin-top:6mm">
+      <div>
+        <h3>Cinco perfiles de riesgo</h3>
+        <table>
+          <tr><th>Perfil</th><th>Delitos</th><th>Base</th></tr>
+          <tr><td>General</td><td>Todos, por severidad</td><td>100 mil hab.</td></tr>
+          <tr><td>Peatonal</td><td>Robo a persona, lesiones, homicidio</td><td>km²</td></tr>
+          <tr><td>Vehicular</td><td>Robo de vehículo y autopartes</td><td>km²</td></tr>
+          <tr><td>Residencial</td><td>Robo a casa, violentos</td><td>100 mil hab.</td></tr>
+          <tr><td>Comercial</td><td>Robo a negocio, banco, carga</td><td>km²</td></tr>
+        </table>
+      </div>
+      <div>
+        <h3>Asistente con garantías</h3>
+        <p>El servidor calcula distancias reales y filtra candidatas; el modelo de lenguaje <b>solo redacta</b>. Su respuesta se valida contra la lista enviada y se rechaza si menciona una colonia inexistente. No puede afirmar que una zona “es segura” ni dar precios.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 5 -->
+  <section>
+    <h2><span class="n">5</span>Figuras</h2>
+    <div class="fig-mapa">
+      <figure>
+        <img src="figuras/mapa-riesgo.svg" alt="Mapa de riesgo general por colonia">
+        <ul class="leyenda">
+          <li><i style="background:var(--critico)"></i>Crítico · 207</li>
+          <li><i style="background:var(--alto)"></i>Alto · 310</li>
+          <li><i style="background:var(--moderado)"></i>Moderado · 517</li>
+          <li><i style="background:var(--bajo)"></i>Bajo · 1,034</li>
+        </ul>
+      </figure>
+      <div>
+        <figcaption style="margin-top:0"><b>Fig. 2.</b> Riesgo general en las 2,068 colonias de Guadalajara, Zapopan, Tlaquepaque, Tonalá, Tlajomulco y El Salto (2016–2021). Las colonias con muestra insuficiente se dibujan translúcidas: se marcan, no se ocultan.</figcaption>
+        <figcaption>Rampa YlOrRd de ColorBrewer: a diferencia de la verde-roja, distingue “bajo” de “crítico” con daltonismo rojo-verde (~8% de los hombres).</figcaption>
+        <figure class="captura" style="margin-top:6mm">
+          <img src="figuras/captura-app.jpg" alt="Captura de la aplicación SafeSpots">
+          <figcaption><b>Fig. 3.</b> Aplicación web: búsqueda de colonias, accesos por intención (<i>Dónde alojarme</i>, <i>Dejar mi auto</i>), selector de perfil, ficha por colonia y aviso permanente de datos históricos.</figcaption>
+        </figure>
+      </div>
+    </div>
+  </section>
+
+  <!-- 6 -->
+  <section>
+    <h2><span class="n">6</span>Resultados</h2>
+    <div class="dos">
+      <figure>
+        <h3 style="margin-top:0">Cobertura del empate</h3>
+        <svg viewBox="0 0 260 64" width="100%">
+          <g font-size="9" fill="#fff" font-weight="700">
+            <rect x="0" y="4" width="219.4" height="30" fill="#0f766e"/>
+            <text x="8" y="23">84.4% ubicados</text>
+            <rect x="219.4" y="4" width="15.6" height="30" fill="#9aa5b1"/>
+            <rect x="235" y="4" width="25" height="30" fill="#5b6773"/>
+          </g>
+                    <g font-size="7.5" fill="#1c2430">
+            <rect x="0" y="44" width="7" height="7" fill="#9aa5b1"/><text x="10" y="51">6.0% sin colonia en la fuente</text>
+            <rect x="130" y="44" width="7" height="7" fill="#5b6773"/><text x="140" y="51">9.7% sin polígono en el padrón</text>
+          </g>
+          <path d="M208 2V36" stroke="#e31a1c" stroke-width="1.5" stroke-dasharray="3 2"/>
+          <text x="206" y="62" font-size="7" fill="#e31a1c" text-anchor="end">meta 80%</text>
+        </svg>
+        <figcaption><b>Fig. 4.</b> 292,190 de 346,384 incidentes asignados a una colonia (90.7% de los que traen nombre). Cero huérfanos, cero geometrías inválidas y suma idéntica a la del ETL.</figcaption>
+      </figure>
+      <figure>
+        <h3 style="margin-top:0">Consultas espaciales (ms, log)</h3>
+        <svg viewBox="0 0 260 100" width="100%" style="overflow:visible">
+          <g font-size="7.5" fill="#1c2430">
+            <text x="0" y="12">Punto en polígono</text>
+            <rect x="0" y="15" width="26" height="7" fill="#9aa5b1"/><rect x="0" y="23" width="9" height="7" fill="#0f766e"/>
+            <text x="30" y="22" font-size="6.5">1.23 → 0.23 ms · 5.3×</text>
+            <text x="0" y="37">Viewport del mapa</text>
+            <rect x="0" y="40" width="31" height="7" fill="#9aa5b1"/><rect x="0" y="48" width="26" height="7" fill="#0f766e"/>
+            <text x="35" y="47" font-size="6.5">1.94 → 1.21 ms · 1.6×</text>
+            <text x="0" y="62">Riesgo en radio de 2 km</text>
+            <rect x="0" y="65" width="75" height="7" fill="#9aa5b1"/><rect x="0" y="73" width="51" height="7" fill="#0f766e"/>
+            <text x="79" y="72" font-size="6.5">124.3 → 13.1 ms · 9.5×</text>
+            <text x="0" y="87">Asignar 100,000 puntos</text>
+            <rect x="0" y="90" width="165" height="7" fill="#9aa5b1"/><rect x="0" y="98" width="110" height="7" fill="#0f766e"/>
+            <text x="170" y="97" font-size="6.5" font-weight="700">636 s → 3.4 s · 186×</text>
+          </g>
+        </svg>
+        <figcaption><b>Fig. 5.</b> <span style="color:#6b7480">■</span> sin índice · <span style="color:#0f766e">■</span> con GiST. Mejor de 5 ejecuciones. El índice decide en volumen; en consultas simples sobre 2,068 polígonos aporta poco.</figcaption>
+      </figure>
+    </div>
+    <h3>Comparación con los objetivos</h3>
+    <table>
+      <tr><th>Objetivo</th><th>Resultado</th><th></th></tr>
+      <tr><td>Pipeline reproducible</td><td>ETL completo en ~5 s, manifiesto con SHA-256 por archivo</td><td class="ok">✔</td></tr>
+      <tr><td>Cobertura &gt; 80%</td><td>84.4% de incidentes ubicados; el resto se reporta en la interfaz</td><td class="ok">✔</td></tr>
+      <tr><td>Índice por perfil</td><td>10,340 filas de riesgo (2,068 colonias × 5 perfiles)</td><td class="ok">✔</td></tr>
+      <tr><td>Aplicación web</td><td>Desplegada en Vercel con mapa, ficha y asistente</td><td class="ok">✔</td></tr>
+      <tr><td>Efecto del índice</td><td>Radio de 2 km: 124 → 13 ms; 100 mil puntos: 636 → 3.4 s</td><td class="ok">✔</td></tr>
+      <tr><td>Hipótesis</td><td>Confirmada dentro del alcance; clustering y análisis día/noche no son posibles con datos públicos</td><td style="color:#b45309;font-weight:700;white-space:nowrap">Parcial</td></tr>
+    </table>
+  </section>
+
+  <!-- 7 + 8 -->
+  <div class="dos fila">
+    <section>
+      <h2><span class="n">7</span>Conclusiones</h2>
+      <ul>
+        <li>Una base espacial con publicación estática democratiza datos de seguridad a costo marginal.</li>
+        <li>La <b>segmentación por perfil</b> fue el aporte con más efecto práctico: el denominador cambia por completo la conclusión sobre una colonia.</li>
+        <li>El análisis de riesgo intraurbano en Guadalajara está limitado por la <b>disponibilidad de datos</b>, no por la técnica. Declarar ese límite es en sí un resultado.</li>
+      </ul>
+    </section>
+    <section>
+      <h2><span class="n">8</span>Trabajo a futuro</h2>
+      <ul>
+        <li>Solicitar al C5 / Fiscalía datos con coordenadas y hora: clustering (DBSCAN), franjas horarias y modelo predictivo.</li>
+        <li>Integrar SESNSP como capa de tendencia reciente y siniestros viales.</li>
+        <li>Cruzar el riesgo con el precio por m² para el módulo inmobiliario.</li>
+        <li>Cuota y autenticación del asistente; aplicación móvil sobre la misma API.</li>
+      </ul>
+    </section>
+  </div>
+
+  <!-- 9 -->
+  <section>
+    <h2><span class="n">9</span>Bibliografía</h2>
+    <ol class="biblio">
+      <li>IIEG Jalisco, <i>Incidencia delictiva por colonia</i> e <i>Información sociodemográfica por colonia</i>. [En línea]. https://iieg.gob.mx</li>
+      <li>INEGI, <i>Marco Geoestadístico 2025</i> y <i>Censo de Población y Vivienda 2020</i>. [En línea]. https://www.inegi.org.mx</li>
+      <li>SESNSP, <i>Datos Abiertos de Incidencia Delictiva</i>. [En línea]. https://www.gob.mx/sesnsp</li>
+      <li>M. Ester, H.-P. Kriegel, J. Sander y X. Xu, “A density-based algorithm for discovering clusters in large spatial databases with noise,” <i>Proc. KDD</i>, 1996, pp. 226–231.</li>
+      <li>D. Clayton y J. Kaldor, “Empirical Bayes estimates of age-standardized relative risks for use in disease mapping,” <i>Biometrics</i>, vol. 43, núm. 3, pp. 671–681, 1987.</li>
+      <li>N. E. Breslow y N. E. Day, <i>Statistical Methods in Cancer Research, Vol. II</i>. Lyon: IARC, 1987.</li>
+      <li>C. A. Brewer, <i>ColorBrewer: Color Advice for Maps</i>. [En línea]. https://colorbrewer2.org</li>
+      <li>PostGIS Development Group, <i>PostGIS Documentation</i>. [En línea]. https://postgis.net</li>
+      <li>Google, <i>Gemini API — Structured output</i>. [En línea]. https://ai.google.dev/gemini-api/docs</li>
+    </ol>
+  </section>
+
+</main>
+
+
+</body>
+</html>
