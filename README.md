@@ -543,7 +543,7 @@ ponla en el `.env` de la raíz del proyecto:
 
 ```dotenv
 GEMINI_API_KEY=tu_clave
-GEMINI_MODEL=gemini-2.5-flash
+GEMINI_MODEL=gemini-3.6-flash
 ```
 
 **No hace falta reiniciar el servidor:** la configuración se relee en cada

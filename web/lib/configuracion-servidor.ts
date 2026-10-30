@@ -23,6 +23,6 @@ export function configuracionGemini(
   // Las variables del despliegue y de web/.env.local tienen prioridad.
   return {
     apiKey: entorno.GEMINI_API_KEY?.trim() || raiz.GEMINI_API_KEY?.trim() || "",
-    modelo: entorno.GEMINI_MODEL?.trim() || raiz.GEMINI_MODEL?.trim() || "gemini-2.5-flash",
+    modelo: entorno.GEMINI_MODEL?.trim() || raiz.GEMINI_MODEL?.trim() || "gemini-3.6-flash",
   };
 }

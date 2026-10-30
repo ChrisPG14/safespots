@@ -51,7 +51,7 @@ export default function AsesorColonia({ objetivo, onObjetivo, referencia, ubicac
     try {
       const res = await fetch("/api/asesor", {
         method: "POST", headers: { "Content-Type": "application/json" },
-        signal: AbortSignal.any([controller.signal, AbortSignal.timeout(45_000)]),
+        signal: AbortSignal.any([controller.signal, AbortSignal.timeout(75_000)]),
         body: JSON.stringify({ objetivo, presupuesto: Number(presupuestos[objetivo]), radioKm: Number(radio), pregunta,
           ...(referencia ? { coloniaClave: referencia.clave } : { ubicacion }),
         }),
@@ -99,7 +99,7 @@ export default function AsesorColonia({ objetivo, onObjetivo, referencia, ubicac
           <p className="text-xs leading-relaxed text-slate-500">El presupuesto orienta la consulta. No contamos con precios ni disponibilidad de alojamientos, rentas o estacionamientos.</p>
           <button type="submit" className="primary-button w-full" disabled={!referencia && !ubicacion}>Consultar con Gemini <span aria-hidden>↗</span></button>
         </fieldset>
-        {cargando && <div role="status" className="rounded-xl bg-teal-50 p-3 text-sm text-teal-800">Comparando colonias y preparando tu orientación…</div>}
+        {cargando && <div role="status" className="rounded-xl bg-teal-50 p-3 text-sm text-teal-800">Comparando colonias y preparando tu orientación… Puede tardar hasta un minuto; si hay un fallo temporal, reintentaremos automáticamente.</div>}
         {error && <p role="alert" className="rounded-xl border border-amber-200 bg-amber-50 p-3 text-sm text-amber-900">{error}</p>}
         <p className="text-[11px] leading-relaxed text-slate-400">Al consultar, se envían a Gemini tus preferencias y las colonias cercanas. Las coordenadas del dispositivo solo se usan en nuestro servidor para calcular distancias.</p>
       </form>
