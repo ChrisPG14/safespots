@@ -1,10 +1,10 @@
 -- ============================================================================
--- 0006 — La vista vigente expone también la densidad por km²
+-- 0006: La vista vigente expone también la densidad por km²
 -- ============================================================================
 -- `v_riesgo_vigente` se definió en la migración 0003, antes de decidir que el
 -- denominador depende del perfil. Exponía `tasa_100k` pero no `densidad_km2`,
--- así que para los tres perfiles normalizados por superficie —peatonal,
--- vehicular y comercial— la vista mostraba una cifra per cápita que NO es la
+-- así que para los tres perfiles normalizados por superficie (peatonal,
+-- vehicular y comercial) la vista mostraba una cifra per cápita que NO es la
 -- que produjo su índice. Quien consultara la base directamente se llevaría una
 -- lectura equivocada.
 --

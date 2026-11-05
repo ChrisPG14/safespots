@@ -1,5 +1,5 @@
 -- ============================================================================
--- 0005 — Índice para búsquedas por radio en metros
+-- 0005: Índice para búsquedas por radio en metros
 -- ============================================================================
 -- El índice GiST de la migración 0001 es sobre `geom`, que está en grados
 -- (EPSG:4326). Sirve para "qué contiene este punto" y para el recuadro del

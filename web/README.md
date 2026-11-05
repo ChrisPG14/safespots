@@ -1,11 +1,10 @@
-# SafeSpots — aplicación web
+# SafeSpots: aplicación web
 
 Interfaz de SafeSpots: mapa de riesgo por colonia de la Zona Metropolitana de
 Guadalajara y asistente de orientación.
 
 **La documentación del proyecto vive en el [README de la raíz](../README.md).**
-Ahí están la metodología, las fuentes, los resultados medidos y la
-correspondencia con el reporte académico. Este archivo cubre solo lo específico
+Ahí están la metodología, las fuentes y los resultados medidos. Este archivo cubre solo lo específico
 de la aplicación web.
 
 ## Desarrollo
@@ -54,7 +53,7 @@ habilitado, con HTTP 503 y un mensaje explícito.
 ### Qué hace el endpoint
 
 `POST /api/asesor` valida la consulta, lee los datos en el servidor, filtra por
-radio con la distancia a la **superficie** de la colonia —no a su centro— y
+radio con la distancia a la **superficie** de la colonia (no a su centro) y
 descarta las muestras insuficientes. Ordena hasta 24 candidatas por el promedio
 de los índices relevantes más una penalización por distancia de hasta 20 puntos.
 Gemini recibe esa lista y redacta; las identidades y métricas de la respuesta se
@@ -92,8 +91,7 @@ npm run build
 
 ## Notas de implementación
 
-Dos incompatibilidades documentadas en detalle en el README de la raíz, que
-conviene conocer antes de tocar el mapa:
+Dos incompatibilidades que hay que tener en cuenta antes de tocar el mapa:
 
 - **El worker de MapLibre** no funciona bajo el empaquetador de Next.js sin
   `setWorkerUrl`. El síntoma es un mapa que carga sin errores pero cuyas capas

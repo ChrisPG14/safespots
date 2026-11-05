@@ -1,5 +1,5 @@
 -- ============================================================================
--- 0002 — Taxonomía de delitos e incidencia delictiva
+-- 0002: Taxonomía de delitos e incidencia delictiva
 -- ============================================================================
 -- El problema central que resuelve esta migración: cada fuente nombra los
 -- delitos distinto. El SESNSP usa una jerarquía de cuatro niveles
@@ -47,7 +47,7 @@ CREATE TABLE IF NOT EXISTS delito (
 
 COMMENT ON COLUMN delito.peso_severidad IS
     'Ponderador subjetivo 1-10 definido por el proyecto, no por la fuente. '
-    'Documentar el criterio en el reporte académico.';
+    'El criterio está documentado en el README.';
 
 -- Las claves marcadas [IIEG] son las que efectivamente aparecen en el
 -- catálogo real de la incidencia por colonia del IIEG (verificado sobre el
@@ -239,7 +239,7 @@ CREATE INDEX IF NOT EXISTS incidente_consulta_mapa_idx
 -- Incidencia agregada
 -- ---------------------------------------------------------------------------
 -- Para fuentes que solo publican conteos, como el SESNSP (municipio-mes-tipo).
--- Es la vía honesta de usar esos datos: sin coordenadas falsas.
+-- Así se usan esos datos sin inventarles coordenadas.
 CREATE TABLE IF NOT EXISTS incidencia_agregada (
     id            bigserial PRIMARY KEY,
     fuente        text      NOT NULL,
@@ -265,7 +265,7 @@ CREATE INDEX IF NOT EXISTS incidencia_agregada_unidad_idx
 -- Bitácora de cargas del ETL
 -- ---------------------------------------------------------------------------
 -- Sin esto no hay forma de responder "¿de cuándo son los datos que está
--- mostrando el mapa?", que es justo lo que va a preguntar un evaluador.
+-- mostrando el mapa?".
 CREATE TABLE IF NOT EXISTS lote_ingesta (
     id                bigserial PRIMARY KEY,
     fuente            text      NOT NULL,

@@ -1,4 +1,4 @@
-# SafeSpots — Riesgo delictivo por colonia en la ZMG
+# SafeSpots: riesgo delictivo por colonia en la ZMG
 
 Plataforma web que mapea la incidencia delictiva por colonia en la Zona
 Metropolitana de Guadalajara a partir de datos oficiales, la convierte en un
@@ -8,12 +8,6 @@ y dónde dejar el auto.
 
 **Proyecto Modular** · Christian Moisés de Alba Velarde · Departamento de
 Ciencias Computacionales, CUCEI, Universidad de Guadalajara.
-
-> **Cómo usar este documento.** Está escrito para servir de base al reporte
-> académico. La sección [§16](#16-correspondencia-con-el-documento-académico)
-> indica qué apartado del README alimenta cada sección del paper, y la
-> [§17](#17-qué-debe-corregirse-del-documento-original) lista lo que el
-> planteamiento original afirmaba y los datos no sostienen.
 
 ---
 
@@ -34,10 +28,8 @@ Ciencias Computacionales, CUCEI, Universidad de Guadalajara.
 13. [Verificación y pruebas](#13-verificación-y-pruebas)
 14. [Puesta en marcha](#14-puesta-en-marcha)
 15. [Estructura del repositorio](#15-estructura-del-repositorio)
-16. [Correspondencia con el documento académico](#16-correspondencia-con-el-documento-académico)
-17. [Qué debe corregirse del documento original](#17-qué-debe-corregirse-del-documento-original)
-18. [Trabajo futuro](#18-trabajo-futuro)
-19. [Fuentes, licencia y referencias](#19-fuentes-licencia-y-referencias)
+16. [Trabajo futuro](#16-trabajo-futuro)
+17. [Fuentes, licencia y referencias](#17-fuentes-licencia-y-referencias)
 
 ---
 
@@ -51,7 +43,7 @@ con búsqueda por nombre y ficha de detalle con las cifras que sustentan cada
 color.
 
 **Índice de riesgo por perfil.** La misma incidencia produce cinco lecturas
-distintas —general, peatonal, vehicular, residencial y comercial— porque cada
+distintas (general, peatonal, vehicular, residencial y comercial) porque cada
 perfil pondera delitos diferentes y, sobre todo, se normaliza con un
 denominador diferente. Una zona puede ser tranquila para quien vive ahí y
 riesgosa para quien deja el auto en la calle.
@@ -74,11 +66,11 @@ verificó fuente por fuente:
 
 | Fuente | Granularidad | Uso en el proyecto |
 |---|---|---|
-| **IIEG — incidencia por colonia** | **Colonia**, mes, 20 tipos de delito. 2016 a **feb 2021**. 241,702 registros | **Núcleo del sistema.** Única fuente pública bajo nivel municipal |
-| IIEG — colonias (shapefile) | 6,624 polígonos de Jalisco con 232 campos censales | Geometrías y población |
-| INEGI — Marco Geoestadístico 2025 | Municipios, localidades, AGEB, manzanas. **Sin colonias** | Contexto municipal |
-| INEGI — Censo 2020 por AGEB | Población a nivel AGEB | Denominadores alternativos |
-| SESNSP — Datos Abiertos | **Solo municipio**, mes. Sin coordenadas, colonia ni hora | Tendencia, no detalle |
+| **IIEG: incidencia por colonia** | **Colonia**, mes, 20 tipos de delito. 2016 a **feb 2021**. 241,702 registros | **Núcleo del sistema.** Única fuente pública bajo nivel municipal |
+| IIEG: colonias (shapefile) | 6,624 polígonos de Jalisco con 232 campos censales | Geometrías y población |
+| INEGI: Marco Geoestadístico 2025 | Municipios, localidades, AGEB, manzanas. **Sin colonias** | Contexto municipal |
+| INEGI: Censo 2020 por AGEB | Población a nivel AGEB | Denominadores alternativos |
+| SESNSP: Datos Abiertos | **Solo municipio**, mes. Sin coordenadas, colonia ni hora | Tendencia, no detalle |
 
 Cuatro consecuencias, todas asumidas en el código y visibles en la interfaz:
 
@@ -125,8 +117,8 @@ INEGI Censo (CSV)    ──┘     índice de riesgo       │
 **Por qué la web no consulta la base en cada visita.** La capa de riesgo son
 2,068 colonias: unos 2.8 MB de GeoJSON simplificado. Servirla como archivo
 estático desde el CDN es instantáneo, gratuito, y evita el arranque en frío de
-Neon, que suspende el cómputo tras cinco minutos de inactividad —justo el patrón
-de uso de un proyecto académico—. PostGIS sigue siendo el sistema de registro:
+Neon, que suspende el cómputo tras cinco minutos de inactividad, justo el patrón
+de uso de un proyecto académico. PostGIS sigue siendo el sistema de registro:
 ahí viven las series completas, los índices espaciales y la bitácora de cargas.
 
 **Stack**
@@ -155,7 +147,7 @@ Detalle que rompe el pipeline si se ignora: **las fuentes oficiales no publican
 en WGS84**. El Marco Geoestadístico del INEGI viene en EPSG:6372
 (cónica conforme de Lambert para México) y las colonias del IIEG en EPSG:32613
 (UTM 13N). Sin reproyectar, la ZMG aparece en medio del océano. Los cálculos
-métricos —áreas y distancias— se hacen proyectados en UTM 13N, nunca en grados.
+métricos (áreas y distancias) se hacen proyectados en UTM 13N, nunca en grados.
 
 ---
 
@@ -216,7 +208,7 @@ pasos, del más al menos confiable:
 
 **Cobertura: 84.4% de todos los incidentes** (90.7% de los que traen nombre de
 colonia). El resto se reporta y se muestra en la interfaz: 6% viene sin colonia
-en la fuente y 9.7% son colonias que no existen en el padrón de polígonos —
+en la fuente y 9.7% son colonias que no existen en el padrón de polígonos:
 Lafayette, Santuario y Capilla de Jesús son colonias reales de Guadalajara que
 el padrón del IIEG, basado en secciones electorales agrupadas, no contiene.
 
@@ -338,10 +330,7 @@ Módulo que traduce el índice en una recomendación redactada.
 Rangos de distancia por objetivo: estacionamiento de 100 m a 1 km, hospedaje de
 500 m a 5 km, renta de 1 a 30 km.
 
-### Decisiones de diseño defendibles
-
-Este módulo es el más fácil de criticar en una defensa, así que conviene tener
-claras sus garantías:
+### Garantías del módulo
 
 **El modelo no inventa lugares.** La identidad, la distancia y las cifras de
 cada recomendación provienen siempre del dataset; el modelo solo aporta la
@@ -415,10 +404,9 @@ Tablas principales: `unidad_geografica`, `delito` y `delito_alias`,
 reservadas `incidente` y `hotspot`.
 
 La columna `calidad_dato` de `riesgo_unidad` declara de qué calidad de insumo
-salió cada número (`colonia_historico`, `agregado_municipal`, `puntual`). Es una
-decisión deliberada de honestidad: un índice derivado de conteos municipales no
-vale lo mismo que uno derivado de incidentes con coordenadas, y la interfaz debe
-poder decirlo.
+salió cada número (`colonia_historico`, `agregado_municipal`, `puntual`). Un
+índice derivado de conteos municipales no vale lo mismo que uno derivado de
+incidentes con coordenadas, y la interfaz debe poder decirlo.
 
 **Para búsquedas por radio hay que usar `riesgo_cerca_de()`, no la vista.** La
 vista `v_riesgo_vigente` lleva un `DISTINCT ON` que obliga al planificador a
@@ -445,7 +433,7 @@ régimen y no el primer acceso a disco.
 | Riesgo en radio de 2 km | 124.29 ms | **13.07 ms** | 9.5× |
 | Asignar 100,000 puntos a su colonia | 636.15 s | **3.42 s** | **186×** |
 
-Tres lecturas honestas de esta tabla, que conviene anticipar en la defensa:
+Cómo leer esta tabla:
 
 **Con 2,068 polígonos el índice aporta poco en consultas simples.** El recorrido
 secuencial sobre una tabla tan chica ya es rápido. Presumir órdenes de magnitud
@@ -494,7 +482,7 @@ base coincide exactamente con lo reportado por el ETL.
 
 ```bash
 cd web
-npm test        # 9 pruebas, Gemini simulado, sin gastar cuota
+npm test        # 15 pruebas, Gemini simulado, sin gastar cuota
 npm run lint
 npm run build
 ```
@@ -504,11 +492,12 @@ de configuración sin filtrar secretos, la geometría sobre los polígonos reale
 (incluido el caso del punto interior que debe evitar el hueco de un polígono),
 el filtrado por distancia y muestra insuficiente para los tres objetivos, el
 rechazo de colonias inventadas o duplicadas, y el ida y vuelta completo con la
-API simulada, incluyendo cuota agotada, timeout y referencia fuera de cobertura.
+API simulada, incluyendo cuota agotada, timeout y referencia fuera de cobertura,
+y los reintentos ante caídas temporales de Gemini.
 
 El desempeño de la base se reproduce con `./db/benchmark.sh`, que genera los
-datos, mide y limpia lo que creó. Las cifras del reporte no deberían pedirse de
-buena fe: quien evalúe el proyecto puede obtener las suyas.
+datos, mide y limpia lo que creó, así que las cifras de §12 se pueden obtener
+en cualquier máquina.
 
 ---
 
@@ -601,68 +590,21 @@ app/
 │   │   └── AsesorColonia.tsx     formulario y recomendaciones
 │   ├── lib/
 │   │   ├── asesor.ts             contexto, validación y esquemas
+│   │   ├── gemini.ts             llamada a Gemini con reintentos
 │   │   ├── geografia.ts          distancias y punto interior
 │   │   ├── riesgo.ts             paleta y formato
 │   │   ├── tipos.ts              tipos de meta.json y del GeoJSON
 │   │   └── configuracion-servidor.ts
 │   ├── tests/                    pruebas con Gemini simulado
 │   └── public/datos/             GeoJSON y meta.json que produce el ETL
+├── poster/                       cartel de la exposición final (60 × 160 cm)
 ├── data/                         descargas y resultados (no se versiona)
 └── docker-compose.yml            PostGIS local
 ```
 
 ---
 
-## 16. Correspondencia con el documento académico
-
-| Sección del paper | De dónde sale |
-|---|---|
-| **Abstract** | §1 y las cifras de §12 |
-| **I. Introducción** | §1 y §2 (la limitación de datos es el planteamiento del problema) |
-| **II. Trabajos relacionados** | §19, más la comparación con plataformas gubernamentales |
-| **III.A Arquitectura y stack** | §3 |
-| **III.B Modelado de riesgo** | §7, con las dos decisiones metodológicas |
-| **III.C Módulo turístico y vial** | §8, perfiles peatonal y vehicular |
-| **III.D Módulo inmobiliario** | §8, perfil residencial |
-| **III.E ETL y persistencia** | §4, §5, §6 y §11 |
-| **III.F Asistente con IA** | §9 (módulo nuevo, no estaba en el planteamiento original) |
-| **IV. Resultados** | §12 completo, y §13 para la reproducibilidad |
-| **V. Conclusiones y trabajo futuro** | §18 |
-| **Referencias** | §19 |
-
-**Sugerencia de enfoque para la defensa.** El aporte más sólido de este proyecto
-no es el mapa: es haber demostrado, con verificación fuente por fuente, que el
-análisis de riesgo delictivo intraurbano en Guadalajara **está limitado por la
-disponibilidad de datos públicos, no por la técnica**, y haber construido aun
-así un sistema que declara sus límites en lugar de disimularlos. Eso es un
-resultado, no una disculpa. El §6 y el §7 aportan además hallazgos
-metodológicos reutilizables por cualquiera que trabaje con estas fuentes.
-
----
-
-## 17. Qué debe corregirse del documento original
-
-El planteamiento inicial contiene afirmaciones que los datos no sostienen. Van
-aquí para que la nueva versión las sustituya:
-
-| Afirmación original | Qué corresponde escribir |
-|---|---|
-| Clustering espacial con **DBSCAN y KDE** sobre delitos | No implementable: no existen delitos geolocalizados públicos. Describir el análisis por unidad administrativa y dejar DBSCAN como trabajo futuro condicionado a obtener datos puntuales |
-| **Random Forest** con **F1-Score de 89.4%** | No hay modelo supervisado entrenado ni etiquetas para entrenarlo. Debe eliminarse o convertirse en trabajo futuro |
-| "**1,420 ms → 45 ms** (PostGIS GiST)" | Sustituir por la tabla medida de §12, que además es reproducible |
-| Análisis de **seguridad peatonal nocturna** | La fuente no registra la hora. Renombrar a riesgo peatonal y declarar la limitación |
-| Datos del **SESNSP** como insumo geoespacial | El SESNSP es municipal-mensual. Sirve como tendencia, no como detalle |
-| "Grupo guía para la excelencia inmobiliaria" | Frase promocional sin contenido técnico; conviene retirarla de un texto académico |
-| Fuentes de **2026** del IIEG y SESNSP | La serie por colonia del IIEG termina en **febrero de 2021**; citar el año real del corte |
-
-Añadir, en cambio, lo que sí se construyó y no estaba previsto: el módulo de
-orientación asistida por modelo de lenguaje (§9), el tratamiento del denominador
-por perfil (§7), la contracción bayesiana, y la metodología de empate de nombres
-con sus tres hallazgos (§6).
-
----
-
-## 18. Trabajo futuro
+## 16. Trabajo futuro
 
 - **Solicitud de transparencia al C5 Jalisco o a la Fiscalía** pidiendo carpetas
   de investigación con colonia y hora. Es la llave que habilitaría el clustering
@@ -672,7 +614,7 @@ con sus tres hallazgos (§6).
 - **Módulo de seguridad vial peatonal** con la capa `iieg:siniestros`, que sí
   tiene coordenadas y franjas horarias de dos horas. Limitaciones duras: son
   atropellamientos, no delitos, y solo del año 2019. Debe ir como capa separada
-  y rotulada con honestidad, nunca fusionada con el índice delictivo.
+  y rotulada como tal, nunca fusionada con el índice delictivo.
 - **Valuación inmobiliaria:** cruzar el estrato de riesgo con precio por metro
   cuadrado de portales de bienes raíces.
 - **Cuota compartida y autenticación** para el asistente antes de un despliegue
@@ -681,14 +623,14 @@ con sus tres hallazgos (§6).
 
 ---
 
-## 19. Fuentes, licencia y referencias
+## 17. Fuentes, licencia y referencias
 
 Datos de incidencia delictiva y polígonos de colonia: **IIEG Jalisco**, con
 datos de la Fiscalía del Estado. Cartografía y censo: **INEGI**. Mapa base:
 **OpenStreetMap**. Cada fuente queda registrada con su URL y su huella SHA-256
 en `data/raw/manifiesto.json` y en la tabla `lote_ingesta`.
 
-Código bajo licencia MIT.
+Código bajo licencia Apache 2.0 (ver [`LICENSE`](LICENSE)).
 
 ### Referencias
 
@@ -709,7 +651,7 @@ Código bajo licencia MIT.
    IARC, 1987. (Método de Byar para intervalos de Poisson.)
 7. C. A. Brewer, *ColorBrewer: Color Advice for Maps*. https://colorbrewer2.org
 8. PostGIS Development Group, *PostGIS Documentation*. https://postgis.net
-9. Google, *Gemini API — Structured output*.
+9. Google, *Gemini API: Structured output*.
    https://ai.google.dev/gemini-api/docs/generate-content/structured-output
 
 > Verifica los datos bibliográficos exactos de [5] y [6] antes de entregar: son

@@ -1,9 +1,8 @@
 #!/usr/bin/env bash
 # Mide el desempeño de las consultas espaciales, con y sin índice.
 #
-# Existe para que las cifras del reporte académico sean REPRODUCIBLES: quien
-# evalúe el proyecto puede correr esto y obtener sus propios números en su
-# propia máquina, en vez de creer una tabla.
+# Hace reproducibles las cifras del reporte: cualquiera puede correrlo y
+# obtener sus propios números en su máquina.
 #
 # Uso:
 #   ./db/benchmark.sh                       # solo las consultas rápidas
@@ -72,7 +71,7 @@ PY
 SIN_INDICE="-c enable_indexscan=off -c enable_bitmapscan=off"
 
 echo "=============================================================================="
-echo " Desempeño de consultas espaciales — PostGIS"
+echo " Desempeño de consultas espaciales en PostGIS"
 echo "=============================================================================="
 psql "$DB_URL" -Atc "SELECT '  ' || count(*) || ' colonias indexadas' FROM unidad_geografica WHERE tipo='colonia'"
 echo

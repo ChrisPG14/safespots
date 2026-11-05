@@ -121,8 +121,8 @@ def cargar_unidades(
 
     Es un upsert sobre (tipo, clave) para que volver a correr el ETL sobre una
     base ya poblada actualice en lugar de duplicar. Las claves son estables
-    entre corridas —se derivan del nombre normalizado, no del orden del
-    shapefile—, así que las referencias desde riesgo_unidad sobreviven.
+    entre corridas (se derivan del nombre normalizado, no del orden del
+    shapefile), así que las referencias desde riesgo_unidad sobreviven.
     """
     registros = []
     for fila in colonias.itertuples():

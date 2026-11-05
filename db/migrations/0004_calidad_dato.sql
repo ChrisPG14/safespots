@@ -1,5 +1,5 @@
 -- ============================================================================
--- 0004 — Vocabulario real de `calidad_dato`
+-- 0004: Vocabulario real de `calidad_dato`
 -- ============================================================================
 -- La migración 0003 definió los valores permitidos cuando el diseño todavía
 -- suponía que existirían incidentes con coordenadas. Al confirmarse que no hay

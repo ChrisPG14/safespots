@@ -4,7 +4,7 @@ Salida: una tabla ordenada de (colonia, delito canónico, año, mes, conteo),
 más un reporte del empate de nombres para poder auditar qué se quedó fuera.
 
 El reporte no es un extra: el 5% de incidentes que no empatan es un dato que
-debe declararse en el reporte académico y mostrarse en la interfaz. Ocultarlo
+debe declararse y mostrarse en la interfaz. Ocultarlo
 haría que los totales del mapa no cuadren con los oficiales sin explicación.
 """
 

@@ -19,7 +19,7 @@ riesgo:
     sabemos, que es lo que hacen los atlas de mortalidad y los índices de
     incidencia serios.
 
-  * Sin el paso 5, la distribución de tasas —muy sesgada a la derecha— hace
+  * Sin el paso 5, la distribución de tasas, muy sesgada a la derecha, hace
     que el 95% de las colonias se vean iguales y solo dos o tres destaquen.
     El logaritmo reparte el color donde está la variación real.
 """
@@ -132,7 +132,7 @@ def _ic_poisson(conteo: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
     """Intervalo de confianza al 95% para un conteo de Poisson (método de Byar).
 
     Se usa Byar en lugar de la aproximación normal porque con conteos chicos
-    —que son la mayoría a nivel colonia— la normal produce límites inferiores
+    (que son la mayoría a nivel colonia) la normal produce límites inferiores
     negativos, que no tienen sentido para un conteo de delitos.
     """
     o = np.asarray(conteo, dtype=float)
@@ -275,7 +275,7 @@ def calcular_riesgo(
         + (1 - peso_propio) * medida_global
     )
     # Sin exposición conocida no se puede afirmar nada propio: se queda en la
-    # referencia global, que es la postura más honesta.
+    # referencia global.
     base["medida_suavizada"] = base["medida_suavizada"].fillna(medida_global)
 
     # --- intervalo de confianza sobre la tasa cruda del perfil ------------
@@ -289,7 +289,7 @@ def calcular_riesgo(
     base["ic_inferior"] = ic_bajo * factor_ic
     base["ic_superior"] = ic_alto * factor_ic
 
-    # Se marca —no se oculta— la unidad cuya estimación no es interpretable
+    # Se marca, no se oculta, la unidad cuya estimación no es interpretable
     # por sí sola. El criterio depende del denominador: una colonia diminuta
     # es problema para una tasa por km², no para una per cápita.
     muestra_baja = exp_valida.isna() | (base["incidentes"] < MIN_INCIDENTES)

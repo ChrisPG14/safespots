@@ -1,5 +1,5 @@
 -- ============================================================================
--- 0003 — Índice de riesgo y hotspots
+-- 0003: Índice de riesgo y hotspots
 -- ============================================================================
 -- El índice de riesgo se PRECALCULA y se guarda, no se computa en cada
 -- request. Razones: el cálculo involucra ventanas temporales, ponderación por
@@ -7,9 +7,8 @@
 -- vivo daría respuestas de segundos y haría inviable el mapa interactivo.
 --
 -- Cada fila declara con qué método y con qué calidad de dato fue calculada.
--- Esto es una decisión deliberada de honestidad: un índice derivado de
--- conteos municipales del SESNSP no vale lo mismo que uno derivado de
--- incidentes con coordenadas, y la interfaz debe poder decirlo.
+-- Un índice derivado de conteos municipales del SESNSP no vale lo mismo que
+-- uno derivado de incidentes con coordenadas, y la interfaz debe poder decirlo.
 -- ============================================================================
 
 -- ---------------------------------------------------------------------------
@@ -19,7 +18,7 @@
 -- Espejo de PERFILES en etl/georisk/taxonomia.py: si cambias uno, cambia el
 -- otro.
 --
--- Nota de honestidad: el proyecto originalmente contemplaba un perfil de
+-- El proyecto originalmente contemplaba un perfil de
 -- "peatón NOCTURNO". Se renombró a "peatonal" a secas porque la fuente de
 -- incidencia por colonia del IIEG no registra la hora del hecho. Prometer un
 -- análisis nocturno sin el dato de hora sería inventarlo. La columna
@@ -95,7 +94,7 @@ CREATE TABLE IF NOT EXISTS riesgo_unidad (
     estrato         text             NOT NULL
                     CHECK (estrato IN ('bajo', 'moderado', 'alto', 'critico')),
 
-    -- Honestidad metodológica: de qué calidad de insumo salió este número.
+    -- De qué calidad de insumo salió este número.
     -- 'agregado_municipal' significa que todas las unidades del municipio
     -- comparten el mismo valor y el mapa NO debe sugerir variación interna.
     calidad_dato    text NOT NULL

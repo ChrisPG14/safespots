@@ -62,12 +62,12 @@ const URL_WORKER = "/maplibre/maplibre-gl-worker.mjs";
  * Estilo base definido aquí mismo, no cargado desde una URL remota.
  *
  * Con un estilo remoto, MapLibre no emite `load` hasta haber descargado ese
- * JSON. Si el CDN está bloqueado —un bloqueador de anuncios, el firewall de
- * una red universitaria, una caída— el evento nunca llega, las capas de
+ * JSON. Si el CDN está bloqueado (un bloqueador de anuncios, el firewall de
+ * una red universitaria, una caída), el evento nunca llega, las capas de
  * riesgo nunca se agregan y el usuario ve un mapa en blanco sin explicación.
  * Con el estilo incrustado, `load` no depende de la red: si las teselas
- * fallan se pierde el mapa de referencia, pero la coropleta —que es el
- * producto— se dibuja igual sobre el color de fondo.
+ * fallan se pierde el mapa de referencia, pero la coropleta, que es el
+ * producto, se dibuja igual sobre el color de fondo.
  *
  * Se usan teselas de OpenStreetMap y no las raster de CARTO porque el
  * endpoint gratuito de CARTO (`basemaps.cartocdn.com/light_all`) ahora
@@ -182,7 +182,7 @@ export default function MapaRiesgo({ meta }: Props) {
   /**
    * Las colonias con muestra insuficiente se dibujan translúcidas.
    *
-   * Es una decisión de honestidad visual: en más de la mitad de las colonias
+   * En más de la mitad de las colonias
    * la estimación no es interpretable por sí sola, y pintarlas con la misma
    * intensidad que las demás transmitiría una certeza que no existe.
    */
@@ -199,6 +199,7 @@ export default function MapaRiesgo({ meta }: Props) {
   // --- construcción del mapa --------------------------------------------
   useEffect(() => {
     if (!contenedor.current || mapa.current) return;
+    const solicitudes = solicitudUbicacion;
 
     // Antes de construir el mapa: sin esto las fuentes GeoJSON nunca cargan.
     setWorkerUrl(URL_WORKER);
@@ -306,7 +307,7 @@ export default function MapaRiesgo({ meta }: Props) {
 
     return () => {
       controller.abort();
-      solicitudUbicacion.current++;
+      solicitudes.current++;
       observador.disconnect();
       ubicacionMarker.current?.remove();
       m.remove();

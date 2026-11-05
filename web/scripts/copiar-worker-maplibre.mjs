@@ -19,8 +19,8 @@
  *     non-JavaScript MIME type of "text/html"
  *
  * El síntoma es desconcertante: el mapa se construye, el evento `load` se
- * dispara y las teselas raster se dibujan —porque se decodifican en el hilo
- * principal—, pero NINGUNA fuente GeoJSON llega a cargar nunca. La fuente se
+ * dispara y las teselas raster se dibujan (porque se decodifican en el hilo
+ * principal), pero NINGUNA fuente GeoJSON llega a cargar nunca. La fuente se
  * queda en `loaded() === false` con cero features, sin un solo error en
  * consola, porque su procesamiento vive en el worker que no existe.
  *

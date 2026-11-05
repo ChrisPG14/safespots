@@ -218,8 +218,8 @@ def clave_comparacion(nombre: str | None) -> str:
 def clave_ordenada(nombre: str | None) -> str:
     """Clave con los tokens ordenados alfabéticamente.
 
-    Hace que "Lomas de Independencia" e "Independencia Lomas" —el mismo lugar
-    escrito al revés— produzcan la misma clave.
+    Hace que "Lomas de Independencia" e "Independencia Lomas" (el mismo lugar
+    escrito al revés) produzcan la misma clave.
     """
     return " ".join(sorted(clave_comparacion(nombre).split()))
 

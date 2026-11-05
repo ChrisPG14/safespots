@@ -50,7 +50,7 @@ def _reparar_y_normalizar(
 
     # Reindexar tras filtrar. Es indispensable, no cosmético: quien construya
     # después un GeoDataFrame mezclando estas columnas con una Serie nueva
-    # —que nace con índice 0..n-1— haría que pandas alinee por índice y
+    # (que nace con índice 0..n-1) haría que pandas alinee por índice y
     # generara la UNIÓN de ambos, es decir filas fantasma con geometría nula.
     # Ese fue exactamente el origen de un 'NoneType' object has no attribute
     # 'wkb' al volcar municipios a PostGIS.

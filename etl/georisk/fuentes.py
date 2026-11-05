@@ -1,7 +1,7 @@
 """Catálogo de fuentes de datos y descarga con caché.
 
 Todas las URLs de aquí fueron verificadas con petición real. Cuando una
-fuente cambia de ubicación —pasa seguido en portales de gobierno— este es el
+fuente cambia de ubicación (pasa seguido en portales de gobierno), este es el
 único archivo que hay que tocar.
 
 La descarga guarda el SHA-256 de cada archivo. Sirve para dos cosas: detectar

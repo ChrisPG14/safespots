@@ -9,7 +9,7 @@ Por qué un archivo estático y no una consulta a la base en cada visita:
   * 2,186 colonias simplificadas pesan pocos megabytes. Cabe de sobra en el
     hosting gratuito de Vercel y se sirve desde CDN.
   * Neon suspende el cómputo tras cinco minutos de inactividad. Una visita
-    esporádica —justo el patrón de un proyecto académico— pagaría el arranque
+    esporádica, justo el patrón de un proyecto académico, pagaría el arranque
     en frío en cada carga del mapa.
   * Cambiar de perfil en la interfaz no vuelve a pedir datos: ya vienen todos.
 
