@@ -1,0 +1,435 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>SafeSpots - Cartel Proyecto Modular</title>
+<style>
+  @page { size: 600mm 1600mm; margin: 0; }
+  :root {
+    --marca: #0f766e;
+    --marca-oscura: #0b4f4a;
+    --marca-clara: #e6f4f2;
+    --texto: #111827;
+    --tenue: #374151;
+    --linea: #cfd8dc;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { background: #fff; }
+  body {
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 31pt; line-height: 1.25; color: var(--texto);
+    -webkit-print-color-adjust: exact; print-color-adjust: exact;
+  }
+  b, strong { font-weight: 700; }
+  .cartel { position: relative; width: 600mm; height: 1600mm; overflow: hidden; background: #fff; }
+
+  /* Franja institucional */
+  .institucional {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 8mm 28mm 6mm; background: #fff;
+  }
+  .institucional img { height: 46mm; display: block; }
+  .institucional .evento { text-align: right; font-size: 28pt; line-height: 1.25; color: var(--marca-oscura); font-weight: 700; }
+
+  /* Cabecera */
+  header { background: var(--marca); color: #fff; padding: 10mm 28mm 10mm; }
+  .marca { display: flex; align-items: center; gap: 9mm; }
+  .marca svg { width: 46mm; height: 46mm; flex: none; }
+  .marca h1 { font-size: 118pt; line-height: .9; letter-spacing: -.01em; }
+  .marca h1 span { font-weight: 400; opacity: .85; }
+  .autoria { margin-left: auto; text-align: right; font-size: 30pt; line-height: 1.3; }
+  .autoria .correos { font-style: italic; opacity: .9; }
+  .subtitulo { font-size: 40pt; line-height: 1.12; font-weight: 700; margin-top: 7mm; }
+
+  /* Cifras clave */
+  .cifras { display: grid; grid-template-columns: repeat(4, 1fr); background: var(--marca-oscura); color: #fff; }
+  .cifras div { padding: 5mm 3mm 6mm; text-align: center; border-right: .6mm solid rgba(255,255,255,.2); }
+  .cifras div:last-child { border-right: 0; }
+  .cifras b { display: block; font-size: 48pt; line-height: 1; }
+  .cifras span { display: block; font-size: 27pt; line-height: 1.15; margin-top: 2.5mm; }
+
+  /* Cuerpo */
+  .cuerpo { padding: 9mm 28mm 0; }
+  section { margin-bottom: 7mm; }
+  h2 {
+    font-size: 38pt; line-height: 1.05; color: var(--marca);
+    display: flex; align-items: center; gap: 5mm;
+    border-bottom: .9mm solid var(--marca); padding-bottom: 2mm; margin-bottom: 4mm;
+  }
+  h2 .n {
+    display: inline-flex; align-items: center; justify-content: center; flex: none;
+    width: 15mm; height: 15mm; border-radius: 50%;
+    background: var(--marca); color: #fff; font-size: 28pt;
+  }
+  h3 { font-size: 32pt; color: var(--marca-oscura); margin: 0 0 2mm; }
+  p + p { margin-top: 3mm; }
+  ul, ol { padding-left: 11mm; }
+  li { margin-top: 1.8mm; }
+  li:first-child { margin-top: 0; }
+  .dos { display: grid; grid-template-columns: 1fr 1fr; gap: 14mm; }
+  .dos > section { margin-bottom: 0; }
+  .fila { margin-bottom: 7mm; }
+
+  .hipotesis { background: var(--marca-clara); border-left: 3mm solid var(--marca); padding: 4mm 6mm; margin-top: 4mm; }
+
+  .pasos { list-style: none; padding: 0; counter-reset: paso; display: grid; grid-template-columns: 1fr 1fr; gap: 4mm 12mm; }
+  .pasos li { counter-increment: paso; position: relative; padding-left: 15mm; margin: 0; }
+  .pasos li::before {
+    content: counter(paso); position: absolute; left: 0; top: .5mm;
+    width: 11mm; height: 11mm; border-radius: 2mm; background: var(--marca-oscura); color: #fff;
+    font-weight: 700; font-size: 26pt; display: flex; align-items: center; justify-content: center;
+  }
+
+  table { width: 100%; border-collapse: collapse; font-size: 29pt; line-height: 1.2; }
+  th { background: var(--marca); color: #fff; text-align: left; padding: 2.2mm 3.5mm; }
+  td { padding: 2.2mm 3.5mm; border-bottom: .5mm solid var(--linea); vertical-align: top; }
+  tr:nth-child(even) td { background: #f3f7f7; }
+  .perfiles th, .perfiles td { text-align: center; width: 20%; }
+  .cumplido { color: #0b6b3a; font-weight: 700; white-space: nowrap; }
+  .parcial { color: #b45309; font-weight: 700; white-space: nowrap; }
+
+  figure { margin: 0; }
+  figcaption { font-size: 28pt; line-height: 1.22; color: var(--tenue); margin-top: 3mm; }
+  figcaption b { color: var(--texto); }
+  .fig-mapa { display: grid; grid-template-columns: 200mm 1fr; gap: 11mm; align-items: start; }
+  .fig-mapa img { width: 100%; display: block; }
+  .leyenda { list-style: none; padding: 0; font-size: 29pt; display: grid; grid-template-columns: 1fr 1fr; gap: 2mm 5mm; margin-top: 4mm; }
+  .leyenda li { display: flex; align-items: center; gap: 3.5mm; margin: 0; }
+  .leyenda i { width: 12mm; height: 12mm; border: .5mm solid #666; flex: none; }
+  .captura img { width: 100%; display: block; border: .6mm solid var(--linea); border-radius: 2mm; }
+  svg text { font-family: Arial, Helvetica, sans-serif; }
+
+  .biblio { font-size: 25pt; line-height: 1.22; padding-left: 12mm; columns: 2; column-gap: 14mm; }
+  .biblio li { break-inside: avoid; margin-top: 1.5mm; }
+
+  footer {
+    position: absolute; left: 0; right: 0; bottom: 0; height: 26mm;
+    background: var(--marca); color: #fff; font-size: 28pt; font-weight: 700;
+    display: flex; align-items: center; justify-content: space-between; padding: 0 28mm;
+  }
+
+  /* Herramientas de edición: solo en pantalla */
+  @media screen {
+    body { background: #9a9a9a; padding: 70px 20px 20px; }
+    .marco { width: calc(600mm * var(--zoom, .4)); height: calc(1600mm * var(--zoom, .4)); margin: 0 auto; overflow: hidden; box-shadow: 0 0 12px rgba(0,0,0,.4); }
+    .cartel { transform: scale(var(--zoom, .4)); transform-origin: 0 0; }
+    [contenteditable]:hover { outline: 2px dashed #4a86e8; }
+    [contenteditable]:focus { outline: 2px solid #4a86e8; }
+    .cambiable { cursor: pointer; }
+  }
+  .barra {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 10;
+    display: flex; gap: 10px; align-items: center; flex-wrap: wrap;
+    padding: 10px 16px; background: #0b4f4a; color: #fff; font: 15px Arial, sans-serif;
+  }
+  .barra button, .barra select { font: 15px Arial, sans-serif; padding: 6px 12px; cursor: pointer; }
+  .barra .aviso { margin-left: auto; font-weight: 700; }
+  .barra .aviso.mal { background: #c00000; padding: 4px 10px; }
+  @media print { .barra { display: none !important; } }
+</style>
+</head>
+<body>
+
+<div class="barra" id="barra">
+  <b>Editar cartel:</b>
+  <span>haz clic en cualquier texto para cambiarlo · clic en una imagen para reemplazarla</span>
+  <label>Zoom
+    <select id="zoom">
+      <option value=".25">25%</option><option value=".4" selected>40%</option>
+      <option value=".6">60%</option><option value="1">100%</option>
+    </select>
+  </label>
+  <button id="guardar">Guardar cambios</button>
+  <button id="pdf">Exportar PDF</button>
+  <span class="aviso" id="aviso"></span>
+</div>
+
+<div class="marco">
+<div class="cartel" id="cartel">
+
+  <div class="institucional">
+    <img src="figuras/logo-udg-cucei.jpg" alt="Universidad de Guadalajara - Centro Universitario de Ciencias Exactas e Ingenierías">
+    <div class="evento">Proyecto Modular<br>Ingeniería en Computación<br>2026B</div>
+  </div>
+
+  <header>
+    <div class="marca">
+      <svg viewBox="0 0 32 32" aria-hidden="true">
+        <rect width="32" height="32" rx="9" fill="#ffffff"/>
+        <path fill="#0f766e" fill-rule="evenodd" d="M16 6.2 23.4 9v6c0 4.7-3 8.9-7.4 10.5C11.6 23.9 8.6 19.7 8.6 15V9ZM16 12.6a2.7 2.7 0 1 0 0 5.4 2.7 2.7 0 1 0 0-5.4Z"/>
+      </svg>
+      <h1>Safe<span>Spots</span></h1>
+      <div class="autoria">
+        <b>Christian Moisés de Alba Velarde</b><br>
+        Universidad de Guadalajara<br>
+        <span class="correos">christian.dealba2467@alumnos.udg.mx</span>
+      </div>
+    </div>
+    <div class="subtitulo">Sistema de Evaluación de Riesgo Delictivo por Colonia en la Zona Metropolitana de Guadalajara</div>
+  </header>
+
+  <div class="cifras">
+    <div><b>346,384</b><span>delitos procesados</span></div>
+    <div><b>2,068</b><span>colonias en 6 municipios</span></div>
+    <div><b>84.4%</b><span>delitos ubicados (meta 80%)</span></div>
+    <div><b>186x</b><span>más rápido con PostGIS</span></div>
+  </div>
+
+  <div class="cuerpo">
+
+    <div class="dos fila">
+      <section>
+        <h2><span class="n">1</span>Introducción</h2>
+        <p>SafeSpots es una plataforma web que mide el <b>riesgo delictivo por colonia</b> en la ZMG con datos oficiales del IIEG y el INEGI, y lo muestra en un mapa interactivo.</p>
+        <p><b>Objetivo:</b> crear un índice de riesgo comparable por colonia que ayude a decidir dónde alojarse, rentar o estacionarse.</p>
+      </section>
+      <section>
+        <h2><span class="n">2</span>Problemática / Hipótesis</h2>
+        <p>No existe un indicador de riesgo comparable por colonia; los datos públicos están en tablas difíciles de interpretar.</p>
+        <div class="hipotesis"><b>Hipótesis:</b> si la incidencia se normaliza según el perfil del usuario y se suaviza estadísticamente, se obtiene un índice comparable que ubica más del 80% de los delitos.</div>
+      </section>
+    </div>
+
+    <section>
+      <h2><span class="n">3</span>Metodología</h2>
+      <ol class="pasos">
+        <li><b>Revisión de fuentes:</b> IIEG, INEGI y SESNSP.</li>
+        <li><b>Proceso ETL</b> reproducible en Python.</li>
+        <li><b>Empate de nombres</b> de colonia en 4 pasos.</li>
+        <li><b>Índice de 0 a 100</b> con suavizado bayesiano.</li>
+        <li><b>Clasificación</b> en 4 niveles de riesgo.</li>
+        <li><b>Pruebas</b> y medición de consultas.</li>
+      </ol>
+    </section>
+
+    <section>
+      <h2><span class="n">4</span>Desarrollo y Tecnología</h2>
+      <figure>
+        <svg viewBox="0 0 540 132" width="100%">
+          <defs>
+            <marker id="f" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="4.5" markerHeight="4.5" orient="auto"><path d="M0 0 10 5 0 10Z" fill="#0b4f4a"/></marker>
+          </defs>
+          <g font-size="11" text-anchor="middle">
+            <rect x="1" y="1" width="118" height="130" rx="5" fill="#f3f7f7" stroke="#9aa5b1"/>
+            <g fill="#111827">
+              <text x="60" y="20" font-weight="700" fill="#0f766e">Fuentes</text>
+              <text x="60" y="48">IIEG incidencia</text>
+              <text x="60" y="72">IIEG colonias</text>
+              <text x="60" y="96">INEGI Marco Geo.</text>
+              <text x="60" y="120">INEGI Censo</text>
+            </g>
+            <rect x="141" y="1" width="118" height="130" rx="5" fill="#0f766e"/>
+            <g fill="#fff">
+              <text x="200" y="20" font-weight="700">ETL Python</text>
+              <text x="200" y="56">empate de</text>
+              <text x="200" y="71">nombres</text>
+              <text x="200" y="100">índice de</text>
+              <text x="200" y="115">riesgo</text>
+            </g>
+            <rect x="281" y="1" width="118" height="56" rx="5" fill="#e6f4f2" stroke="#0f766e"/>
+            <g fill="#111827"><text x="340" y="25" font-weight="700">PostgreSQL</text><text x="340" y="43">+ PostGIS</text></g>
+            <rect x="281" y="75" width="118" height="56" rx="5" fill="#e6f4f2" stroke="#0f766e"/>
+            <g fill="#111827"><text x="340" y="99" font-weight="700">GeoJSON</text><text x="340" y="117">en CDN</text></g>
+            <rect x="421" y="1" width="118" height="56" rx="5" fill="#0b4f4a"/>
+            <g fill="#fff"><text x="480" y="25" font-weight="700">Next.js</text><text x="480" y="43">MapLibre</text></g>
+            <rect x="421" y="75" width="118" height="56" rx="5" fill="#0b4f4a"/>
+            <g fill="#fff"><text x="480" y="99" font-weight="700">Asistente</text><text x="480" y="117">Gemini</text></g>
+          </g>
+          <g stroke="#0b4f4a" stroke-width="1.8" fill="none" marker-end="url(#f)">
+            <path d="M119 66H139"/>
+            <path d="M259 29H279"/><path d="M259 103H279"/>
+            <path d="M399 103H419"/><path d="M399 29H419" stroke-dasharray="3 2"/>
+            <path d="M480 75V59"/>
+          </g>
+        </svg>
+        <figcaption><b>Figura 1.</b> Arquitectura del sistema, de las fuentes oficiales a la aplicación web.</figcaption>
+      </figure>
+      <h3 style="margin-top:6mm">Cinco perfiles de riesgo</h3>
+      <table class="perfiles">
+        <tr><th>General</th><th>Peatonal</th><th>Vehicular</th><th>Residencial</th><th>Comercial</th></tr>
+        <tr><td>por 100 mil hab.</td><td>por km²</td><td>por km²</td><td>por 100 mil hab.</td><td>por km²</td></tr>
+      </table>
+    </section>
+
+    <section>
+      <h2><span class="n">5</span>Figuras</h2>
+      <div class="fig-mapa">
+        <figure>
+          <img src="figuras/mapa-riesgo.svg" alt="Mapa de riesgo general por colonia">
+          <figcaption><b>Figura 2.</b> Riesgo general en 2,068 colonias de 6 municipios (2016 a 2021).</figcaption>
+        </figure>
+        <div>
+          <figure class="captura">
+            <img src="figuras/captura-app.jpg" alt="Interfaz principal de la aplicación SafeSpots">
+            <figcaption><b>Figura 3.</b> Aplicación web: búsqueda de colonias, perfiles de riesgo y mapa interactivo.</figcaption>
+          </figure>
+          <ul class="leyenda">
+            <li><i style="background:#e31a1c"></i>Crítico</li>
+            <li><i style="background:#fd8d3c"></i>Alto</li>
+            <li><i style="background:#fecc5c"></i>Moderado</li>
+            <li><i style="background:#ffffb2"></i>Bajo</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <h2><span class="n">6</span>Resultados</h2>
+      <div class="dos">
+        <figure>
+          <h3>Cobertura del empate</h3>
+          <svg viewBox="0 0 260 92" width="100%">
+            <g font-size="12" fill="#fff" font-weight="700">
+              <rect x="0" y="4" width="219.4" height="34" fill="#0f766e"/>
+              <text x="8" y="26">84.4% ubicados</text>
+              <rect x="219.4" y="4" width="15.6" height="34" fill="#9aa5b1"/>
+              <rect x="235" y="4" width="25" height="34" fill="#5b6773"/>
+            </g>
+            <path d="M208 1V41" stroke="#e31a1c" stroke-width="1.8" stroke-dasharray="3 2"/>
+            <text x="206" y="52" font-size="10" fill="#c00000" text-anchor="end" font-weight="700">meta 80%</text>
+            <g font-size="10.5" fill="#111827">
+              <rect x="0" y="60" width="9" height="9" fill="#9aa5b1"/><text x="14" y="68.5">6.0% sin colonia en la fuente</text>
+              <rect x="0" y="78" width="9" height="9" fill="#5b6773"/><text x="14" y="86.5">9.7% sin polígono en el padrón</text>
+            </g>
+          </svg>
+          <figcaption><b>Figura 4.</b> 292,190 de 346,384 delitos ubicados en una colonia.</figcaption>
+        </figure>
+        <figure>
+          <h3>Consultas espaciales</h3>
+          <svg viewBox="0 0 260 130" width="100%">
+            <g font-size="10.5" fill="#111827">
+              <text x="0" y="10">Punto en polígono</text>
+              <rect x="0" y="13" width="19" height="8" fill="#9aa5b1"/><rect x="0" y="22" width="7" height="8" fill="#0f766e"/>
+              <text x="24" y="28" font-size="9.5">1.23 a 0.23 ms</text>
+              <text x="0" y="42">Vista del mapa</text>
+              <rect x="0" y="45" width="23" height="8" fill="#9aa5b1"/><rect x="0" y="54" width="19" height="8" fill="#0f766e"/>
+              <text x="28" y="60" font-size="9.5">1.94 a 1.21 ms</text>
+              <text x="0" y="74">Riesgo en radio de 2 km</text>
+              <rect x="0" y="77" width="55" height="8" fill="#9aa5b1"/><rect x="0" y="86" width="37" height="8" fill="#0f766e"/>
+              <text x="60" y="92" font-size="9.5">124 a 13 ms (9.5x)</text>
+              <text x="0" y="106">Asignar 100,000 puntos</text>
+              <rect x="0" y="109" width="120" height="8" fill="#9aa5b1"/><rect x="0" y="118" width="80" height="8" fill="#0f766e"/>
+              <text x="125" y="124" font-size="9.5" font-weight="700">636 a 3.4 s (186x)</text>
+            </g>
+          </svg>
+          <figcaption><b>Figura 5.</b> Gris: sin índice; verde: con índice GiST (escala log.).</figcaption>
+        </figure>
+      </div>
+      <h3 style="margin-top:6mm">Comparación con los objetivos</h3>
+      <table>
+        <tr><th>Objetivo</th><th>Resultado</th><th>Estado</th></tr>
+        <tr><td>Proceso reproducible</td><td>ETL completo en 5 s</td><td class="cumplido">Cumplido</td></tr>
+        <tr><td>Cobertura mayor a 80%</td><td>84.4% de delitos ubicados</td><td class="cumplido">Cumplido</td></tr>
+        <tr><td>Índice por perfil</td><td>2,068 colonias por 5 perfiles</td><td class="cumplido">Cumplido</td></tr>
+        <tr><td>Aplicación web</td><td>Desplegada en Vercel</td><td class="cumplido">Cumplido</td></tr>
+        <tr><td>Efecto del índice</td><td>Hasta 186 veces más rápido</td><td class="cumplido">Cumplido</td></tr>
+        <tr><td>Hipótesis</td><td>Confirmada; sin análisis por hora</td><td class="parcial">Parcial</td></tr>
+      </table>
+    </section>
+
+    <div class="dos fila">
+      <section>
+        <h2><span class="n">7</span>Conclusiones</h2>
+        <ul>
+          <li>El perfil del usuario cambia la lectura del riesgo de una colonia.</li>
+          <li>Publicar el mapa como archivo estático lo hace rápido y económico.</li>
+          <li>El límite son los datos públicos, no la tecnología.</li>
+        </ul>
+      </section>
+      <section>
+        <h2><span class="n">8</span>Trabajo a futuro</h2>
+        <ul>
+          <li>Obtener datos con hora y ubicación exacta.</li>
+          <li>Agregar tendencia reciente del SESNSP.</li>
+          <li>Cruzar el riesgo con el precio de vivienda.</li>
+          <li>Desarrollar una aplicación móvil.</li>
+        </ul>
+      </section>
+    </div>
+
+    <section>
+      <h2><span class="n">9</span>Bibliografía</h2>
+      <ol class="biblio">
+        <li>IIEG Jalisco, <i>Incidencia delictiva por colonia</i>. https://iieg.gob.mx</li>
+        <li>INEGI, <i>Marco Geoestadístico 2025</i> y <i>Censo 2020</i>. https://www.inegi.org.mx</li>
+        <li>SESNSP, <i>Datos Abiertos de Incidencia Delictiva</i>. https://www.gob.mx/sesnsp</li>
+        <li>D. Clayton y J. Kaldor, "Empirical Bayes estimates of age-standardized relative risks," <i>Biometrics</i>, vol. 43, 1987.</li>
+        <li>N. E. Breslow y N. E. Day, <i>Statistical Methods in Cancer Research, Vol. II</i>. IARC, 1987.</li>
+        <li>M. Ester et al., "A density-based algorithm for discovering clusters," <i>Proc. KDD</i>, 1996.</li>
+        <li>C. A. Brewer, <i>ColorBrewer</i>. https://colorbrewer2.org</li>
+        <li>PostGIS Development Group, <i>PostGIS Documentation</i>. https://postgis.net</li>
+        <li>Google, <i>Gemini API, Structured output</i>. https://ai.google.dev</li>
+      </ol>
+    </section>
+
+  </div>
+
+  <footer>
+    <span>FECHA: 05/11/2026</span>
+    <span>Exposición Final de Proyectos Modulares · CUCEI</span>
+  </footer>
+</div>
+</div>
+
+<script>
+(function () {
+  var cartel = document.getElementById('cartel');
+  var aviso = document.getElementById('aviso');
+
+  // Todo el texto del cartel se puede editar con un clic.
+  cartel.querySelectorAll('.evento, h1, .autoria, .subtitulo, .cifras div, h2, h3, p, li, .hipotesis, figcaption, table, footer span')
+    .forEach(function (el) {
+      if (!el.parentElement.closest('[contenteditable]') && !el.querySelector('p, li, h3, figcaption, table')) el.setAttribute('contenteditable', 'true');
+    });
+
+  // Reemplazar imágenes: clic sobre la imagen y elegir un archivo.
+  cartel.querySelectorAll('img').forEach(function (img) {
+    img.classList.add('cambiable');
+    img.title = 'Clic para reemplazar la imagen';
+    img.addEventListener('click', function () {
+      var input = document.createElement('input');
+      input.type = 'file'; input.accept = 'image/*';
+      input.onchange = function () {
+        var archivo = input.files[0]; if (!archivo) return;
+        var lector = new FileReader();
+        lector.onload = function () { img.src = lector.result; setTimeout(revisar, 100); };
+        lector.readAsDataURL(archivo);
+      };
+      input.click();
+    });
+  });
+
+  // Aviso si el contenido ya no cabe en los 160 cm.
+  function revisar() {
+    var pie = cartel.querySelector('footer').getBoundingClientRect().top;
+    var cuerpo = cartel.querySelector('.cuerpo').getBoundingClientRect().bottom;
+    var sobra = cuerpo > pie;
+    aviso.textContent = sobra ? 'El contenido no cabe en 60 x 160 cm: recorta texto' : 'El contenido cabe en 60 x 160 cm';
+    aviso.className = 'aviso' + (sobra ? ' mal' : '');
+    return sobra;
+  }
+  cartel.addEventListener('input', revisar);
+  window.addEventListener('load', revisar);
+
+  document.getElementById('zoom').addEventListener('change', function (e) {
+    document.documentElement.style.setProperty('--zoom', e.target.value); revisar();
+  });
+
+  document.getElementById('pdf').addEventListener('click', function () { window.print(); });
+
+  // Descarga una copia del archivo con los cambios hechos.
+  document.getElementById('guardar').addEventListener('click', function () {
+    var copia = document.documentElement.cloneNode(true);
+    copia.querySelectorAll('[contenteditable]').forEach(function (el) { el.removeAttribute('contenteditable'); });
+    copia.querySelectorAll('.cambiable').forEach(function (el) { el.classList.remove('cambiable'); el.removeAttribute('title'); });
+    copia.querySelector('#aviso').textContent = '';
+    var html = '<!doctype html>\n' + copia.outerHTML;
+    var a = document.createElement('a');
+    a.href = URL.createObjectURL(new Blob([html], { type: 'text/html' }));
+    a.download = 'SafeSpots_Cartel.html';
+    a.click();
+  });
+})();
+</script>
+</body>
+</html>
